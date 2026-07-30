@@ -119,6 +119,9 @@ class VideosTab extends ConsumerWidget {
                                 child: SizedBox(
                                   height: 42,
                                   child: OutlinedButton.icon(
+                                    style: OutlinedButton.styleFrom(
+                                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                                    ),
                                     onPressed: () {
                                       VideoPreview.show(context, video.videoUrl, video.titulo);
                                     },
@@ -132,6 +135,9 @@ class VideosTab extends ConsumerWidget {
                                 child: SizedBox(
                                   height: 42,
                                   child: ElevatedButton.icon(
+                                    style: ElevatedButton.styleFrom(
+                                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                                    ),
                                     onPressed: () async {
                                       final launched = await launchUrl(
                                         Uri.parse(_downloadUrl(video.videoUrl)),

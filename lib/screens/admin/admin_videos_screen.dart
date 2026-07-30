@@ -232,6 +232,9 @@ class _VideoTile extends StatelessWidget {
                   child: SizedBox(
                     height: 36,
                     child: OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 6),
+                      ),
                       onPressed: () {
                         VideoPreview.show(context, video.videoUrl, video.titulo);
                       },
@@ -245,6 +248,9 @@ class _VideoTile extends StatelessWidget {
                   child: SizedBox(
                     height: 36,
                     child: ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 6),
+                      ),
                       onPressed: () async {
                         final launched = await launchUrl(
                           Uri.parse(_downloadUrl(video.videoUrl)),
