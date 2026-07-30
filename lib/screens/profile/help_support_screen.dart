@@ -64,7 +64,7 @@ class HelpSupportScreen extends StatelessWidget {
           const _FaqTile(
             question: 'Quando recebo minha comissão?',
             answer:
-                'As comissões são apuradas conforme os relatórios de vendas sincronizados com a CJ Affiliate e pagas via a chave PIX cadastrada em "Dados Bancários".',
+                'As comissões são apuradas conforme os relatórios de vendas sincronizados com a RedStar e pagas via a chave PIX cadastrada em "Dados Bancários".',
           ),
           const _FaqTile(
             question: 'Como recebo novos links de produtos?',
@@ -74,7 +74,7 @@ class HelpSupportScreen extends StatelessWidget {
           const _FaqTile(
             question: 'Posso alterar meu SID?',
             answer:
-                'Não. O SID é vinculado à sua conta na CJ Affiliate e não pode ser alterado pelo painel.',
+                'Não. O SID é vinculado à sua conta e não pode ser alterado pelo painel.',
           ),
         ],
       ),

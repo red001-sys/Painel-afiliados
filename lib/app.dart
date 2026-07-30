@@ -18,6 +18,7 @@ import 'providers/affiliate_provider.dart';
 class CJApp extends ConsumerStatefulWidget {
   const CJApp({super.key});
 
+
   @override
   ConsumerState<CJApp> createState() => _CJAppState();
 }
@@ -66,7 +67,7 @@ class _CJAppState extends ConsumerState<CJApp> {
   Widget build(BuildContext context) {
     final themeMode = ref.watch(themeModeProvider);
     return MaterialApp(
-      title: 'CJ Painel',
+      title: 'RedStar Painel',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,

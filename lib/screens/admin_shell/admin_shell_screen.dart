@@ -25,7 +25,7 @@ class _AdminShellScreenState extends State<AdminShellScreen> {
     'Produtos',
     'Vídeos',
     'Ranking',
-    'Sincronização CJ',
+    'Sincronização RedStar',
     'Configurações',
   ];
 
@@ -70,7 +70,7 @@ class _AdminShellScreenState extends State<AdminShellScreen> {
                     const Icon(Icons.bolt_rounded, size: 48, color: AppColors.ecoGreen),
                     const SizedBox(height: 8),
                     const Text(
-                      'CJ Painel Admin',
+                      'RedStar Painel Admin',
                       style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
                     ),
                     const Divider(),
@@ -106,7 +106,7 @@ class _AdminShellScreenState extends State<AdminShellScreen> {
                     ),
                     _DrawerItem(
                       icon: Icons.sync_rounded,
-                      label: 'Sincronização CJ',
+                      label: 'Sincronização RedStar',
                       selected: _selectedIndex == 5,
                       onTap: () => setState(() { _selectedIndex = 5; Navigator.pop(context); }),
                     ),
@@ -165,7 +165,7 @@ class _AdminShellScreenState extends State<AdminShellScreen> {
                       ),
                       NavigationRailDestination(
                         icon: Icon(Icons.sync_rounded),
-                        label: Text('Sync CJ'),
+                        label: Text('Sync RedStar'),
                       ),
                       NavigationRailDestination(
                         icon: Icon(Icons.settings_rounded),

@@ -45,7 +45,7 @@ class _AdminSyncScreenState extends ConsumerState<AdminSyncScreen> {
                         color: AppColors.ecoGreen),
                     const SizedBox(width: 8),
                     Text(
-                      'Sincronizar CJ Affiliate',
+                      'Sincronizar RedStar',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,

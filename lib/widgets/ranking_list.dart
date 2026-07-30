@@ -62,8 +62,12 @@ class _RankingTile extends StatelessWidget {
   }
 
   String _starsText() {
-    final full = entry.estrelas.floor();
-    final half = entry.estrelas - full >= 0.5 ? 1 : 0;
+    final total = entry.estrelas;
+    if (total <= 0) return '☆☆☆☆☆';
+    final stars = total <= 1 ? total : 1.0 + (total - 1) * 0.5;
+    final capped = stars.clamp(0, 5);
+    final full = capped.floor();
+    final half = capped - full >= 0.5 ? 1 : 0;
     final empty = 5 - full - half;
     return '${'★' * full}${half == 1 ? '½' : ''}${'☆' * empty}';
   }
@@ -78,6 +82,7 @@ class _RankingTile extends StatelessWidget {
       margin: const EdgeInsets.symmetric(vertical: 6),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: colorScheme.outlineVariant, width: 0.5),
       ),
       child: Padding(
         padding: const EdgeInsets.all(12),

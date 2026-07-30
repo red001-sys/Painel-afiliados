@@ -144,7 +144,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ),
               SizedBox(height: AppTheme.spacingSM),
               Text(
-                'Acesse o painel de subafiliados',
+                'Acesse o painel de afiliados',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 15,
@@ -226,7 +226,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
               // Footer
               Text(
-                'EcoFlow × CJ Affiliate',
+                'EcoFlow × RedStar',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 13,

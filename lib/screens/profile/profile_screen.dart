@@ -136,7 +136,7 @@ class ProfileScreen extends ConsumerWidget {
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 4),
               child: Text(
-                'Instagram: @r.e.d_s.t.a.r',
+                'Instagram',
                 style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                 textAlign: TextAlign.center,
               ),
@@ -155,7 +155,7 @@ class ProfileScreen extends ConsumerWidget {
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 4),
               child: Text(
-                'WhatsApp: +55 85 99827-1418',
+                'WhatsApp',
                 style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                 textAlign: TextAlign.center,
               ),
@@ -174,7 +174,7 @@ class ProfileScreen extends ConsumerWidget {
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 4),
               child: Text(
-                'Email: redstarsuporteof@gmail.com',
+                'Email',
                 style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                 textAlign: TextAlign.center,
               ),
@@ -257,14 +257,20 @@ class _ProfileAvatar extends StatelessWidget {
     if (pickedFile == null) return;
 
     try {
-      final file = File(pickedFile.path);
+      final bytes = await pickedFile.readAsBytes();
       final ext = pickedFile.path.split('.').last;
       final userId = SupabaseService.client.auth.currentUser?.id;
       if (userId == null) return;
 
+      final tempFile = File('${Directory.systemTemp.path}/$userId.$ext');
+      await tempFile.writeAsBytes(bytes);
+
       await SupabaseService.client.storage
           .from('avatars')
-          .upload('$userId.$ext', file, fileOptions: FileOptions(upsert: true));
+          .upload('$userId.$ext', tempFile, fileOptions: FileOptions(
+            upsert: true,
+            contentType: ext == 'png' ? 'image/png' : 'image/jpeg',
+          ));
 
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

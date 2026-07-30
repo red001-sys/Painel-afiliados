@@ -29,7 +29,7 @@ class _AdminVideosScreenState extends ConsumerState<AdminVideosScreen> {
             children: [
               Expanded(
                 child: Text(
-                  'Vídeos disponibilizados para os sub-afiliados baixarem',
+                  'Vídeos disponibilizados para os afiliados baixarem',
                   style: TextStyle(
                     fontSize: 13,
                     color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),

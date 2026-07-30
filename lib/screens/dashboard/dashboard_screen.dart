@@ -300,7 +300,7 @@ class _MyLinksTab extends ConsumerWidget {
               return const EmptyState(
                 icon: Icons.link_rounded,
                 title: 'Nenhum link disponível',
-                subtitle: 'Seus links de afiliado aparecerão aqui',
+                subtitle: 'Seus links aparecerão aqui',
               );
             }
 

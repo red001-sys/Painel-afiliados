@@ -141,7 +141,7 @@ class _SplashScreenState extends State<SplashScreen>
               ),
               const SizedBox(height: 24),
               const Text(
-                'CJ Painel',
+                'RedStar Painel',
                 style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.w700,
@@ -151,7 +151,7 @@ class _SplashScreenState extends State<SplashScreen>
               ),
               const SizedBox(height: 8),
               Text(
-                'Painel de Subafiliados',
+                'Painel de Afiliados',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w400,

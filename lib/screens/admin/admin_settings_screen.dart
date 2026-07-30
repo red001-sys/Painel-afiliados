@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/routes/app_router.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/theme_provider.dart';
 
 class AdminSettingsScreen extends ConsumerWidget {
   const AdminSettingsScreen({super.key});
@@ -56,12 +57,24 @@ class AdminSettingsScreen extends ConsumerWidget {
         Card(
           child: Column(
             children: [
-              ListTile(
-                leading: const Icon(Icons.dark_mode_rounded),
-                title: const Text('Tema'),
-                subtitle: const Text('Claro'),
-                trailing: const Icon(Icons.chevron_right_rounded),
-                onTap: () {},
+              Consumer(
+                builder: (context, ref, _) {
+                  final themeMode = ref.watch(themeModeProvider);
+                  return SwitchListTile(
+                    secondary: Icon(
+                      themeMode == ThemeMode.dark
+                          ? Icons.dark_mode_rounded
+                          : Icons.light_mode_rounded,
+                    ),
+                    title: const Text('Tema escuro'),
+                    value: themeMode == ThemeMode.dark,
+                    onChanged: (value) {
+                      ref.read(themeModeProvider.notifier).setMode(
+                        value ? ThemeMode.dark : ThemeMode.light,
+                      );
+                    },
+                  );
+                },
               ),
               const Divider(height: 1),
               ListTile(
@@ -75,16 +88,16 @@ class AdminSettingsScreen extends ConsumerWidget {
               ListTile(
                 leading: const Icon(Icons.info_outline_rounded),
                 title: const Text('Sobre'),
-                subtitle: const Text('CJ Painel v1.0.0'),
+                subtitle: const Text('RedStar Painel v1.0.0'),
                 trailing: const Icon(Icons.chevron_right_rounded),
                 onTap: () => showAboutDialog(
                   context: context,
-                  applicationName: 'CJ Painel',
+                  applicationName: 'RedStar Painel',
                   applicationVersion: '1.0.0',
                   applicationIcon: const Icon(Icons.bolt_rounded,
                     size: 48, color: AppColors.ecoGreen),
                   children: const [
-                    Text('Painel de Subafiliados CJ Affiliate'),
+                    Text('Painel de Afiliados RedStar'),
                   ],
                 ),
               ),
