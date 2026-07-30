@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
@@ -255,14 +257,14 @@ class _ProfileAvatar extends StatelessWidget {
     if (pickedFile == null) return;
 
     try {
-      final bytes = await pickedFile.readAsBytes();
+      final file = File(pickedFile.path);
       final ext = pickedFile.path.split('.').last;
       final userId = SupabaseService.client.auth.currentUser?.id;
       if (userId == null) return;
 
       await SupabaseService.client.storage
           .from('avatars')
-          .upload('$userId.$ext', bytes, fileOptions: FileOptions(upsert: true));
+          .upload('$userId.$ext', file, fileOptions: FileOptions(upsert: true));
 
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
