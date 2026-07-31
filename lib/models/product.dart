@@ -7,6 +7,11 @@ class Product {
     this.cjUrl,
     this.imagemUrl,
     this.preco,
+    this.salePrice,
+    this.currency,
+    this.brand,
+    this.cjProductId,
+    this.cjAdvertiserId,
     this.ativo = true,
     required this.createdAt,
   });
@@ -18,6 +23,11 @@ class Product {
   final String? cjUrl;
   final String? imagemUrl;
   final double? preco;
+  final double? salePrice;
+  final String? currency;
+  final String? brand;
+  final String? cjProductId;
+  final String? cjAdvertiserId;
   final bool ativo;
   final DateTime createdAt;
 
@@ -30,6 +40,11 @@ class Product {
       cjUrl: json['cj_url'] as String?,
       imagemUrl: json['imagem_url'] as String?,
       preco: (json['preco'] as num?)?.toDouble(),
+      salePrice: (json['sale_price'] as num?)?.toDouble(),
+      currency: json['currency'] as String?,
+      brand: json['brand'] as String?,
+      cjProductId: json['cj_product_id'] as String?,
+      cjAdvertiserId: json['cj_advertiser_id'] as String?,
       ativo: json['ativo'] as bool? ?? true,
       createdAt: DateTime.parse(json['created_at'] as String),
     );
@@ -64,6 +79,11 @@ class Product {
       cjUrl: cjUrl ?? this.cjUrl,
       imagemUrl: imagemUrl ?? this.imagemUrl,
       preco: preco ?? this.preco,
+      salePrice: salePrice,
+      currency: currency,
+      brand: brand,
+      cjProductId: cjProductId,
+      cjAdvertiserId: cjAdvertiserId,
       ativo: ativo ?? this.ativo,
       createdAt: createdAt,
     );

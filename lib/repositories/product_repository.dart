@@ -50,4 +50,14 @@ class ProductRepository {
   Future<void> delete(String id) async {
     await _client.from('products').delete().eq('id', id);
   }
+
+  Future<void> updateAtivo(String id, bool ativo) async {
+    await _client.from('products').update({'ativo': ativo}).eq('id', id);
+  }
+
+  /// Dispara a edge function que sincroniza o catálogo EcoFlow (USD) da CJ.
+  Future<Map<String, dynamic>> syncFromCJ() async {
+    final response = await _client.functions.invoke('sync-ecoflow-products');
+    return Map<String, dynamic>.from(response.data as Map);
+  }
 }

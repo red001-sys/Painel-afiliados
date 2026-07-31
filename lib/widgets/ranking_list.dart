@@ -62,12 +62,9 @@ class _RankingTile extends StatelessWidget {
   }
 
   String _starsText() {
-    final total = entry.estrelas;
-    if (total <= 0) return '☆☆☆☆☆';
-    final stars = total <= 1 ? total : 1.0 + (total - 1) * 0.5;
-    final capped = stars.clamp(0, 5);
+    final capped = entry.estrelas.clamp(0, 5);
     final full = capped.floor();
-    final half = capped - full >= 0.5 ? 1 : 0;
+    final half = (capped - full) >= 0.5 ? 1 : 0;
     final empty = 5 - full - half;
     return '${'★' * full}${half == 1 ? '½' : ''}${'☆' * empty}';
   }

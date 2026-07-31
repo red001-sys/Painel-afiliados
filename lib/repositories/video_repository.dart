@@ -32,6 +32,28 @@ class VideoRepository {
     return '$publicUrl?download';
   }
 
+  /// Uploads a cover image to the public "videos" Storage bucket and
+  /// returns a plain viewable URL (no `?download` — this needs to render
+  /// inline as an <img>, unlike the video file itself).
+  Future<String> uploadThumbnail(
+    Uint8List bytes,
+    String fileName, {
+    String? contentType,
+  }) async {
+    final path = 'thumb_${DateTime.now().millisecondsSinceEpoch}_$fileName';
+
+    await _client.storage.from('videos').uploadBinary(
+          path,
+          bytes,
+          fileOptions: FileOptions(
+            contentType: contentType ?? 'image/jpeg',
+            upsert: false,
+          ),
+        );
+
+    return _client.storage.from('videos').getPublicUrl(path);
+  }
+
   Future<void> deleteUploadedFile(String storagePath) async {
     await _client.storage.from('videos').remove([storagePath]);
   }

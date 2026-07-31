@@ -1,9 +1,7 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:supabase_flutter/supabase_flutter.dart' show FileOptions;
+import 'package:supabase_flutter/supabase_flutter.dart' show FileOptions, UserAttributes;
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/constants/app_colors.dart';
@@ -242,10 +240,18 @@ class ProfileScreen extends ConsumerWidget {
   }
 }
 
-class _ProfileAvatar extends StatelessWidget {
+class _ProfileAvatar extends StatefulWidget {
   const _ProfileAvatar({required this.user});
 
   final dynamic user;
+
+  @override
+  State<_ProfileAvatar> createState() => _ProfileAvatarState();
+}
+
+class _ProfileAvatarState extends State<_ProfileAvatar> {
+  String? _localAvatarUrl;
+  bool _isUploading = false;
 
   Future<void> _pickProfileImage(BuildContext context) async {
     final picker = ImagePicker();
@@ -256,21 +262,40 @@ class _ProfileAvatar extends StatelessWidget {
     );
     if (pickedFile == null) return;
 
+    setState(() => _isUploading = true);
+
     try {
+      // Read as bytes and upload directly — no dart:io File/Directory
+      // here, since those aren't available on Flutter Web and would
+      // crash at runtime on the platform this app is mostly used on.
       final bytes = await pickedFile.readAsBytes();
-      final ext = pickedFile.path.split('.').last;
+      final ext = pickedFile.path.split('.').last.toLowerCase();
       final userId = SupabaseService.client.auth.currentUser?.id;
       if (userId == null) return;
 
-      final tempFile = File('${Directory.systemTemp.path}/$userId.$ext');
-      await tempFile.writeAsBytes(bytes);
+      final path = '$userId.$ext';
 
-      await SupabaseService.client.storage
-          .from('avatars')
-          .upload('$userId.$ext', tempFile, fileOptions: FileOptions(
-            upsert: true,
-            contentType: ext == 'png' ? 'image/png' : 'image/jpeg',
-          ));
+      await SupabaseService.client.storage.from('avatars').uploadBinary(
+            path,
+            bytes,
+            fileOptions: FileOptions(
+              upsert: true,
+              contentType: ext == 'png' ? 'image/png' : 'image/jpeg',
+            ),
+          );
+
+      // Cache-bust so the new photo shows immediately instead of a
+      // browser-cached copy of the old file at the same path.
+      final publicUrl =
+          '${SupabaseService.client.storage.from('avatars').getPublicUrl(path)}?t=${DateTime.now().millisecondsSinceEpoch}';
+
+      await SupabaseService.client.auth.updateUser(
+        UserAttributes(data: {'avatar_url': publicUrl}),
+      );
+
+      if (mounted) {
+        setState(() => _localAvatarUrl = publicUrl);
+      }
 
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -283,16 +308,19 @@ class _ProfileAvatar extends StatelessWidget {
           SnackBar(content: Text('Erro ao atualizar foto: $e')),
         );
       }
+    } finally {
+      if (mounted) setState(() => _isUploading = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final avatarUrl = user?.userMetadata?['avatar_url'] as String?;
+    final avatarUrl =
+        _localAvatarUrl ?? widget.user?.userMetadata?['avatar_url'] as String?;
 
     return GestureDetector(
-      onTap: () => _pickProfileImage(context),
+      onTap: _isUploading ? null : () => _pickProfileImage(context),
       child: Stack(
         children: [
           CircleAvatar(
@@ -314,7 +342,12 @@ class _ProfileAvatar extends StatelessWidget {
                 shape: BoxShape.circle,
                 border: Border.all(color: colorScheme.surface, width: 2),
               ),
-              child: const Icon(Icons.camera_alt_rounded, size: 14, color: Colors.white),
+              child: _isUploading
+                  ? const Padding(
+                      padding: EdgeInsets.all(5),
+                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                    )
+                  : const Icon(Icons.camera_alt_rounded, size: 14, color: Colors.white),
             ),
           ),
         ],

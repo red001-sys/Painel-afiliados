@@ -73,26 +73,38 @@ class VideosTab extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    if (video.thumbnailUrl != null)
-                      AspectRatio(
+                    InkWell(
+                      onTap: () => VideoPreview.show(context, video.videoUrl, video.titulo),
+                      child: AspectRatio(
                         aspectRatio: 16 / 9,
-                        child: Image.network(
-                          video.thumbnailUrl!,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => Container(
-                            color: AppColors.ecoGreen.withValues(alpha: 0.1),
-                            child: const Icon(Icons.play_circle_outline_rounded,
-                                size: 40, color: AppColors.ecoGreen),
-                          ),
+                        child: Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            if (video.thumbnailUrl != null)
+                              Image.network(
+                                video.thumbnailUrl!,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, __, ___) => Container(
+                                  color: AppColors.ecoGreen.withValues(alpha: 0.1),
+                                ),
+                              )
+                            else
+                              Container(color: AppColors.ecoGreen.withValues(alpha: 0.1)),
+                            Container(
+                              color: Colors.black.withValues(alpha: 0.15),
+                              child: const Center(
+                                child: CircleAvatar(
+                                  radius: 28,
+                                  backgroundColor: Colors.white,
+                                  child: Icon(Icons.play_arrow_rounded,
+                                      size: 32, color: AppColors.ecoGreenDark),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                      )
-                    else
-                      Container(
-                        height: 100,
-                        color: AppColors.ecoGreen.withValues(alpha: 0.1),
-                        child: const Icon(Icons.play_circle_outline_rounded,
-                            size: 40, color: AppColors.ecoGreen),
                       ),
+                    ),
                     Padding(
                       padding: const EdgeInsets.all(12),
                       child: Column(
@@ -113,48 +125,24 @@ class VideosTab extends ConsumerWidget {
                             ),
                           ],
                           const SizedBox(height: 12),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: SizedBox(
-                                  height: 42,
-                                  child: OutlinedButton.icon(
-                                    style: OutlinedButton.styleFrom(
-                                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                                    ),
-                                    onPressed: () {
-                                      VideoPreview.show(context, video.videoUrl, video.titulo);
-                                    },
-                                    icon: const Icon(Icons.play_arrow_rounded, size: 18),
-                                    label: const Text('Visualizar'),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: SizedBox(
-                                  height: 42,
-                                  child: ElevatedButton.icon(
-                                    style: ElevatedButton.styleFrom(
-                                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                                    ),
-                                    onPressed: () async {
-                                      final launched = await launchUrl(
-                                        Uri.parse(_downloadUrl(video.videoUrl)),
-                                        mode: LaunchMode.externalApplication,
-                                      );
-                                      if (!launched && context.mounted) {
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          const SnackBar(content: Text('Não foi possível baixar o vídeo')),
-                                        );
-                                      }
-                                    },
-                                    icon: const Icon(Icons.download_rounded, size: 18),
-                                    label: const Text('Baixar'),
-                                  ),
-                                ),
-                              ),
-                            ],
+                          SizedBox(
+                            width: double.infinity,
+                            height: 42,
+                            child: ElevatedButton.icon(
+                              onPressed: () async {
+                                final launched = await launchUrl(
+                                  Uri.parse(_downloadUrl(video.videoUrl)),
+                                  mode: LaunchMode.externalApplication,
+                                );
+                                if (!launched && context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('Não foi possível baixar o vídeo')),
+                                  );
+                                }
+                              },
+                              icon: const Icon(Icons.download_rounded, size: 18),
+                              label: const Text('Baixar'),
+                            ),
                           ),
                         ],
                       ),

@@ -15,6 +15,7 @@ class AdminProductsScreen extends ConsumerStatefulWidget {
 
 class _AdminProductsScreenState extends ConsumerState<AdminProductsScreen> {
   String _search = '';
+  bool _syncing = false;
 
   @override
   Widget build(BuildContext context) {
@@ -34,6 +35,18 @@ class _AdminProductsScreenState extends ConsumerState<AdminProductsScreen> {
                     prefixIcon: Icon(Icons.search_rounded),
                   ),
                 ),
+              ),
+              const SizedBox(width: 8),
+              IconButton.filledTonal(
+                onPressed: _syncing ? null : () => _runSync(context),
+                tooltip: 'Sincronizar produtos EcoFlow da CJ',
+                icon: _syncing
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.sync_rounded),
               ),
               const SizedBox(width: 8),
               IconButton.filled(
@@ -87,6 +100,7 @@ class _AdminProductsScreenState extends ConsumerState<AdminProductsScreen> {
                     product: filtered[index],
                     onEdit: () => _showProductDialog(context, ref, product: filtered[index]),
                     onDelete: () => _deleteProduct(context, ref, filtered[index]),
+                    onToggleAtivo: () => _toggleAtivo(context, ref, filtered[index]),
                   ),
                 ),
               );
@@ -95,6 +109,74 @@ class _AdminProductsScreenState extends ConsumerState<AdminProductsScreen> {
         ),
       ],
     );
+  }
+
+  Future<void> _runSync(BuildContext context) async {
+    setState(() => _syncing = true);
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const _SyncProgressDialog(),
+    );
+
+    try {
+      final result = await ref.read(productRepositoryProvider).syncFromCJ();
+      if (context.mounted) Navigator.of(context, rootNavigator: true).pop();
+
+      if (!context.mounted) return;
+      if (result['success'] == true) {
+        showDialog(
+          context: context,
+          builder: (_) => _SyncResultDialog(result: result),
+        );
+      } else {
+        showDialog(
+          context: context,
+          builder: (_) => AlertDialog(
+            title: const Text('Falha na sincronização'),
+            content: Text(result['error']?.toString() ?? 'Erro desconhecido'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Fechar'),
+              ),
+            ],
+          ),
+        );
+      }
+      ref.invalidate(productsProvider);
+      ref.invalidate(activeProductsProvider);
+    } catch (e) {
+      if (context.mounted) {
+        Navigator.of(context, rootNavigator: true).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erro ao sincronizar: $e'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _syncing = false);
+    }
+  }
+
+  Future<void> _toggleAtivo(BuildContext context, WidgetRef ref, Product product) async {
+    try {
+      await ref.read(productRepositoryProvider).updateAtivo(product.id, !product.ativo);
+      ref.invalidate(productsProvider);
+      ref.invalidate(activeProductsProvider);
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erro ao atualizar produto: $e'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    }
   }
 
   void _showProductDialog(BuildContext context, WidgetRef ref, {Product? product}) {
@@ -154,11 +236,13 @@ class _ProductTile extends StatelessWidget {
     required this.product,
     required this.onEdit,
     required this.onDelete,
+    required this.onToggleAtivo,
   });
 
   final Product product;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
+  final VoidCallback onToggleAtivo;
 
   @override
   Widget build(BuildContext context) {
@@ -176,7 +260,7 @@ class _ProductTile extends StatelessWidget {
                   width: 48,
                   height: 48,
                   fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => Container(
+                  errorBuilder: (_, _, _) => Container(
                     width: 48,
                     height: 48,
                     decoration: BoxDecoration(
@@ -209,7 +293,7 @@ class _ProductTile extends StatelessWidget {
                 if (product.preco != null) ...[
                   const SizedBox(width: 8),
                   Text(
-                    'R\$ ${product.preco!.toStringAsFixed(2)}',
+                    '${_priceSymbol(product)} ${product.preco!.toStringAsFixed(2)}',
                     style: const TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
@@ -232,18 +316,43 @@ class _ProductTile extends StatelessWidget {
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-              decoration: BoxDecoration(
-                color: (product.ativo ? AppColors.ecoGreen : Colors.orange).withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(8),
+            if (product.cjProductId != null) ...[
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: Colors.indigo.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Text(
+                  'CJ',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.indigo,
+                  ),
+                ),
               ),
-              child: Text(
-                product.ativo ? 'Ativo' : 'Inativo',
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w600,
-                  color: product.ativo ? AppColors.ecoGreen : Colors.orange,
+              const SizedBox(width: 4),
+            ],
+            InkWell(
+              onTap: onToggleAtivo,
+              borderRadius: BorderRadius.circular(8),
+              child: Tooltip(
+                message: product.ativo ? 'Desativar' : 'Ativar',
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: (product.ativo ? AppColors.ecoGreen : Colors.orange).withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    product.ativo ? 'Ativo' : 'Inativo',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: product.ativo ? AppColors.ecoGreen : Colors.orange,
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -262,6 +371,10 @@ class _ProductTile extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _priceSymbol(Product product) {
+    return product.currency?.toUpperCase() == 'USD' ? r'$' : r'R$';
   }
 }
 
@@ -416,5 +529,126 @@ class _ProductDialogBodyState extends State<_ProductDialogBody> {
         );
       }
     }
+  }
+}
+
+class _SyncProgressDialog extends StatelessWidget {
+  const _SyncProgressDialog();
+
+  @override
+  Widget build(BuildContext context) {
+    return const AlertDialog(
+      content: Row(
+        children: [
+          SizedBox(
+            width: 24,
+            height: 24,
+            child: CircularProgressIndicator(strokeWidth: 2.5),
+          ),
+          SizedBox(width: 16),
+          Expanded(child: Text('Sincronizando catálogo EcoFlow...')),
+        ],
+      ),
+    );
+  }
+}
+
+class _SyncResultDialog extends StatelessWidget {
+  const _SyncResultDialog({required this.result});
+
+  final Map<String, dynamic> result;
+
+  @override
+  Widget build(BuildContext context) {
+    final imported = (result['imported'] as num?)?.toInt() ?? 0;
+    final updated = (result['updated'] as num?)?.toInt() ?? 0;
+    final skipped = (result['skippedNonUsd'] as num?)?.toInt() ?? 0;
+    final failed = (result['failed'] as num?)?.toInt() ?? 0;
+    final duration = (result['durationMs'] as num?)?.toInt() ?? 0;
+    final total = (result['totalAvailable'] as num?)?.toInt() ?? 0;
+
+    return AlertDialog(
+      title: const Text('Sincronização concluída'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('$total produtos no catálogo EcoFlow (US)'),
+          const SizedBox(height: 12),
+          _ResultRow(
+            label: 'Novos importados',
+            value: '$imported',
+            color: AppColors.ecoGreen,
+          ),
+          _ResultRow(
+            label: 'Atualizados',
+            value: '$updated',
+            color: Colors.blue,
+          ),
+          _ResultRow(
+            label: 'Ignorados (fora USD)',
+            value: '$skipped',
+            color: Colors.orange,
+          ),
+          _ResultRow(
+            label: 'Falhas',
+            value: '$failed',
+            color: failed > 0 ? AppColors.error : AppColors.ecoGreen,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Duração: ${(duration / 1000).toStringAsFixed(1)}s',
+            style: TextStyle(
+              fontSize: 12,
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Fechar'),
+        ),
+      ],
+    );
+  }
+}
+
+class _ResultRow extends StatelessWidget {
+  const _ResultRow({
+    required this.label,
+    required this.value,
+    required this.color,
+  });
+
+  final String label;
+  final String value;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2),
+      child: Row(
+        children: [
+          Container(
+            width: 10,
+            height: 10,
+            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+          ),
+          const SizedBox(width: 8),
+          Expanded(child: Text(label)),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              color: color,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

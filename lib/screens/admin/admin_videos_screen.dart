@@ -155,34 +155,35 @@ class _VideoTile extends StatelessWidget {
         children: [
           ListTile(
             contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-            leading: video.thumbnailUrl != null
-                ? ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: Image.network(
-                      video.thumbnailUrl!,
-                      width: 48,
-                      height: 48,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => Container(
-                        width: 48,
-                        height: 48,
-                        decoration: BoxDecoration(
-                          color: AppColors.ecoGreen.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: const Icon(Icons.play_circle_outline_rounded, color: AppColors.ecoGreen),
-                      ),
-                    ),
-                  )
-                : Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      color: AppColors.ecoGreen.withValues(alpha: 0.1),
+            leading: InkWell(
+              onTap: () => VideoPreview.show(context, video.videoUrl, video.titulo),
+              borderRadius: BorderRadius.circular(8),
+              child: SizedBox(
+                width: 48,
+                height: 48,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    ClipRRect(
                       borderRadius: BorderRadius.circular(8),
+                      child: video.thumbnailUrl != null
+                          ? Image.network(
+                              video.thumbnailUrl!,
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, __, ___) => Container(
+                                color: AppColors.ecoGreen.withValues(alpha: 0.1),
+                              ),
+                            )
+                          : Container(color: AppColors.ecoGreen.withValues(alpha: 0.1)),
                     ),
-                    child: const Icon(Icons.play_circle_outline_rounded, color: AppColors.ecoGreen),
-                  ),
+                    const Center(
+                      child: Icon(Icons.play_circle_fill_rounded,
+                          color: AppColors.ecoGreenDark, size: 22),
+                    ),
+                  ],
+                ),
+              ),
+            ),
             title: Text(video.titulo, style: const TextStyle(fontWeight: FontWeight.w600)),
             subtitle: video.descricao != null && video.descricao!.isNotEmpty
                 ? Text(
@@ -226,48 +227,24 @@ class _VideoTile extends StatelessWidget {
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-            child: Row(
-              children: [
-                Expanded(
-                  child: SizedBox(
-                    height: 36,
-                    child: OutlinedButton.icon(
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 6),
-                      ),
-                      onPressed: () {
-                        VideoPreview.show(context, video.videoUrl, video.titulo);
-                      },
-                      icon: const Icon(Icons.play_arrow_rounded, size: 16),
-                      label: const Text('Visualizar', style: TextStyle(fontSize: 13)),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: SizedBox(
-                    height: 36,
-                    child: ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 6),
-                      ),
-                      onPressed: () async {
-                        final launched = await launchUrl(
-                          Uri.parse(_downloadUrl(video.videoUrl)),
-                          mode: LaunchMode.externalApplication,
-                        );
-                        if (!launched && context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Não foi possível baixar o vídeo')),
-                          );
-                        }
-                      },
-                      icon: const Icon(Icons.download_rounded, size: 16),
-                      label: const Text('Baixar', style: TextStyle(fontSize: 13)),
-                    ),
-                  ),
-                ),
-              ],
+            child: SizedBox(
+              width: double.infinity,
+              height: 36,
+              child: OutlinedButton.icon(
+                onPressed: () async {
+                  final launched = await launchUrl(
+                    Uri.parse(_downloadUrl(video.videoUrl)),
+                    mode: LaunchMode.externalApplication,
+                  );
+                  if (!launched && context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Não foi possível baixar o vídeo')),
+                    );
+                  }
+                },
+                icon: const Icon(Icons.download_rounded, size: 16),
+                label: const Text('Baixar', style: TextStyle(fontSize: 13)),
+              ),
             ),
           ),
         ],
@@ -295,6 +272,7 @@ class _VideoDialogBodyState extends State<_VideoDialogBody> {
   bool _ativo = true;
   bool _isUploading = false;
   String? _uploadedFileName;
+  bool _isUploadingThumb = false;
 
   @override
   void initState() {
@@ -369,9 +347,24 @@ class _VideoDialogBodyState extends State<_VideoDialogBody> {
               ),
             ),
             SizedBox(height: AppTheme.spacingMD),
+            OutlinedButton.icon(
+              onPressed: _isUploadingThumb ? null : _pickAndUploadThumbnail,
+              icon: _isUploadingThumb
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.image_rounded),
+              label: Text(_isUploadingThumb ? 'Enviando...' : 'Enviar capa (imagem)'),
+            ),
+            SizedBox(height: AppTheme.spacingSM),
             TextField(
               controller: _thumbCtrl,
-              decoration: const InputDecoration(labelText: 'URL da capa (opcional)'),
+              decoration: const InputDecoration(
+                labelText: 'URL da capa (opcional)',
+                hintText: 'Preenchido automaticamente após o envio',
+              ),
             ),
             SizedBox(height: AppTheme.spacingMD),
             SwitchListTile(
@@ -393,6 +386,48 @@ class _VideoDialogBodyState extends State<_VideoDialogBody> {
         ),
       ),
     );
+  }
+
+  Future<void> _pickAndUploadThumbnail() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.image,
+      withData: true,
+    );
+
+    if (result == null || result.files.isEmpty) return;
+
+    final file = result.files.first;
+    if (file.bytes == null) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Não foi possível ler a imagem selecionada'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+      return;
+    }
+
+    setState(() => _isUploadingThumb = true);
+
+    try {
+      final ext = file.name.split('.').last.toLowerCase();
+      final url = await widget.ref.read(videoRepositoryProvider).uploadThumbnail(
+            file.bytes!,
+            file.name,
+            contentType: ext == 'png' ? 'image/png' : 'image/jpeg',
+          );
+      setState(() => _thumbCtrl.text = url);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erro ao enviar capa: $e'), backgroundColor: AppColors.error),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isUploadingThumb = false);
+    }
   }
 
   Future<void> _pickAndUploadVideo() async {
