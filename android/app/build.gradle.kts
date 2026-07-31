@@ -9,16 +9,19 @@ plugins {
 
 // Chave de assinatura: lê de android/key.properties (build local) ou de
 // variáveis de ambiente (CI). Fora do repositório — ver .gitignore.
+// Obs.: nomes locais distintos de `storeFile`/`storePassword`/etc. porque,
+// dentro do closure `signingConfigs { create("release") }`, o receiver é o
+// SigningConfig e um identificador igual apontaria pra propriedade dele (null).
 val keystoreProperties = Properties()
 val keystorePropertiesFile = rootProject.file("key.properties")
 if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(keystorePropertiesFile.inputStream())
 }
-val storeFile = keystoreProperties.getProperty("storeFile") ?: System.getenv("ANDROID_KEYSTORE_FILE")
-val storePassword = keystoreProperties.getProperty("storePassword") ?: System.getenv("ANDROID_KEYSTORE_PASSWORD")
-val keyAlias = keystoreProperties.getProperty("keyAlias") ?: System.getenv("ANDROID_KEY_ALIAS")
-val keyPassword = keystoreProperties.getProperty("keyPassword") ?: System.getenv("ANDROID_KEY_PASSWORD")
-val hasReleaseKey = storeFile != null
+val keystoreFilePath = keystoreProperties.getProperty("storeFile") ?: System.getenv("ANDROID_KEYSTORE_FILE")
+val keystoreStorePassword = keystoreProperties.getProperty("storePassword") ?: System.getenv("ANDROID_KEYSTORE_PASSWORD")
+val keystoreKeyAlias = keystoreProperties.getProperty("keyAlias") ?: System.getenv("ANDROID_KEY_ALIAS")
+val keystoreKeyPassword = keystoreProperties.getProperty("keyPassword") ?: System.getenv("ANDROID_KEY_PASSWORD")
+val hasReleaseKey = keystoreFilePath != null
 
 android {
     namespace = "com.redstar.painel"
@@ -48,10 +51,10 @@ android {
     signingConfigs {
         create("release") {
             if (hasReleaseKey) {
-                storeFile = file(storeFile!!)
-                storePassword = storePassword
-                keyAlias = keyAlias
-                keyPassword = keyPassword
+                storeFile = file(keystoreFilePath!!)
+                storePassword = keystoreStorePassword
+                keyAlias = keystoreKeyAlias
+                keyPassword = keystoreKeyPassword
             }
         }
     }

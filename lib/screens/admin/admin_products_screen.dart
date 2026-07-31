@@ -6,6 +6,8 @@ import '../../core/theme/app_theme.dart';
 import '../../models/product.dart';
 import '../../providers/product_provider.dart';
 
+enum _StatusFilter { all, active, inactive }
+
 class AdminProductsScreen extends ConsumerStatefulWidget {
   const AdminProductsScreen({super.key});
 
@@ -16,6 +18,7 @@ class AdminProductsScreen extends ConsumerStatefulWidget {
 class _AdminProductsScreenState extends ConsumerState<AdminProductsScreen> {
   String _search = '';
   bool _syncing = false;
+  _StatusFilter _statusFilter = _StatusFilter.all;
 
   @override
   Widget build(BuildContext context) {
@@ -56,12 +59,38 @@ class _AdminProductsScreenState extends ConsumerState<AdminProductsScreen> {
             ],
           ),
         ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+          child: Row(
+            children: [
+              _FilterChip(
+                label: 'Todos',
+                selected: _statusFilter == _StatusFilter.all,
+                onSelected: () => setState(() => _statusFilter = _StatusFilter.all),
+              ),
+              const SizedBox(width: 8),
+              _FilterChip(
+                label: 'Ativos',
+                selected: _statusFilter == _StatusFilter.active,
+                onSelected: () => setState(() => _statusFilter = _StatusFilter.active),
+              ),
+              const SizedBox(width: 8),
+              _FilterChip(
+                label: 'Inativos',
+                selected: _statusFilter == _StatusFilter.inactive,
+                onSelected: () => setState(() => _statusFilter = _StatusFilter.inactive),
+              ),
+            ],
+          ),
+        ),
         Expanded(
           child: productsAsync.when(
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (e, _) => Center(child: Text('Erro: $e')),
             data: (products) {
               final filtered = products.where((p) {
+                if (_statusFilter == _StatusFilter.active && !p.ativo) return false;
+                if (_statusFilter == _StatusFilter.inactive && p.ativo) return false;
                 if (_search.isEmpty) return true;
                 final q = _search.toLowerCase();
                 return p.nome.toLowerCase().contains(q) ||
@@ -77,7 +106,9 @@ class _AdminProductsScreenState extends ConsumerState<AdminProductsScreen> {
                         color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.2)),
                       const SizedBox(height: 16),
                       Text(
-                        _search.isNotEmpty ? 'Nenhum produto encontrado' : 'Nenhum produto cadastrado',
+                        _search.isNotEmpty || _statusFilter != _StatusFilter.all
+                            ? 'Nenhum produto encontrado'
+                            : 'Nenhum produto cadastrado',
                         style: TextStyle(
                           fontSize: 16,
                           color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
@@ -648,6 +679,34 @@ class _ResultRow extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _FilterChip extends StatelessWidget {
+  const _FilterChip({
+    required this.label,
+    required this.selected,
+    required this.onSelected,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return ChoiceChip(
+      label: Text(label),
+      selected: selected,
+      onSelected: (_) => onSelected(),
+      showCheckmark: false,
+      selectedColor: AppColors.ecoGreen.withValues(alpha: 0.15),
+      labelStyle: TextStyle(
+        fontSize: 13,
+        fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+        color: selected ? AppColors.ecoGreenDark : null,
       ),
     );
   }
