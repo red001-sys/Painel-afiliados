@@ -379,7 +379,7 @@ class _LinkTile extends StatelessWidget {
                         ),
                       if (link.productPreco != null)
                         Text(
-                          'R\$ ${link.productPreco!.toStringAsFixed(2)}',
+                          '\$ ${link.productPreco!.toStringAsFixed(2)}',
                           style: const TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,

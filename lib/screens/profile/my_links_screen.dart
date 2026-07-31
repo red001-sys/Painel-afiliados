@@ -103,7 +103,7 @@ class MyLinksScreen extends ConsumerWidget {
                                 ),
                                 if (link.productPreco != null)
                                   Text(
-                                    'R\$ ${link.productPreco!.toStringAsFixed(2)}',
+                                    '\$ ${link.productPreco!.toStringAsFixed(2)}',
                                     style: const TextStyle(
                                       fontSize: 13,
                                       fontWeight: FontWeight.w600,

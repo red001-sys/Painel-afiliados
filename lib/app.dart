@@ -67,7 +67,7 @@ class _CJAppState extends ConsumerState<CJApp> {
   Widget build(BuildContext context) {
     final themeMode = ref.watch(themeModeProvider);
     return MaterialApp(
-      title: 'RedStar Painel',
+      title: 'RedStar Afiliados',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
