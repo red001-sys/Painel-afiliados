@@ -1,0 +1,99 @@
+name: Build APK e AAB
+
+on:
+  workflow_dispatch:
+    inputs:
+      buildType:
+        description: 'Tipo de build'
+        type: choice
+        options:
+          - apk
+          - aab
+          - both
+        default: both
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    name: Build ${{ github.event.inputs.buildType || 'both' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Flutter version
+        run: flutter --version
+
+      - name: Restore keystore de assinatura
+        if: ${{ secrets.KEYSTORE_B64 != '' }}
+        run: |
+          echo "${{ secrets.KEYSTORE_B64 }}" | base64 -d > android/app/upload-keystore.jks
+          chmod 600 android/app/upload-keystore.jks
+
+      - name: Dependências
+        run: flutter pub get
+
+      - name: Análise estática
+        run: flutter analyze
+        continue-on-error: true
+
+      - name: Testes
+        run: flutter test
+        continue-on-error: true
+
+      - name: Build APK (Release)
+        if: ${{ (github.event.inputs.buildType == 'apk' || github.event.inputs.buildType == 'both') && secrets.KEYSTORE_B64 != '' }}
+        env:
+          ANDROID_KEYSTORE_FILE: android/app/upload-keystore.jks
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: flutter build apk --release
+
+      - name: Build APK (Release, sem chave - assinatura debug)
+        if: ${{ (github.event.inputs.buildType == 'apk' || github.event.inputs.buildType == 'both') && secrets.KEYSTORE_B64 == '' }}
+        run: flutter build apk --release
+
+      - name: Build AAB (Release)
+        if: ${{ (github.event.inputs.buildType == 'aab' || github.event.inputs.buildType == 'both') && secrets.KEYSTORE_B64 != '' }}
+        env:
+          ANDROID_KEYSTORE_FILE: android/app/upload-keystore.jks
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: flutter build appbundle --release
+
+      - name: Build AAB (Release, sem chave - assinatura debug)
+        if: ${{ (github.event.inputs.buildType == 'aab' || github.event.inputs.buildType == 'both') && secrets.KEYSTORE_B64 == '' }}
+        run: flutter build appbundle --release
+
+      - name: Upload APK
+        if: ${{ github.event.inputs.buildType == 'apk' || github.event.inputs.buildType == 'both' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: apk-release
+          path: |
+            build/app/outputs/flutter-apk/*.apk
+
+      - name: Upload AAB
+        if: ${{ github.event.inputs.buildType == 'aab' || github.event.inputs.buildType == 'both' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: aab-release
+          path: |
+            build/app/outputs/bundle/release/*.aab
