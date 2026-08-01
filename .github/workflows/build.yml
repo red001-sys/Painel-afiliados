@@ -39,12 +39,6 @@ jobs:
       - name: Flutter version
         run: flutter --version
 
-      - name: Restore keystore de assinatura
-        if: ${{ secrets.KEYSTORE_B64 != '' }}
-        run: |
-          echo "${{ secrets.KEYSTORE_B64 }}" | base64 -d > android/app/upload-keystore.jks
-          chmod 600 android/app/upload-keystore.jks
-
       - name: Dependências
         run: flutter pub get
 
@@ -56,30 +50,24 @@ jobs:
         run: flutter test
         continue-on-error: true
 
+      # A keystore vem em base64 no secret. O build.gradle.kts decodifica
+      # automaticamente via ANDROID_KEYSTORE_BASE64 (ver android/app/build.gradle.kts).
       - name: Build APK (Release)
-        if: ${{ (github.event.inputs.buildType == 'apk' || github.event.inputs.buildType == 'both') && secrets.KEYSTORE_B64 != '' }}
+        if: ${{ github.event.inputs.buildType == 'apk' || github.event.inputs.buildType == 'both' }}
         env:
-          ANDROID_KEYSTORE_FILE: android/app/upload-keystore.jks
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.KEYSTORE_B64 }}
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           ANDROID_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           ANDROID_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-        run: flutter build apk --release
-
-      - name: Build APK (Release, sem chave - assinatura debug)
-        if: ${{ (github.event.inputs.buildType == 'apk' || github.event.inputs.buildType == 'both') && secrets.KEYSTORE_B64 == '' }}
         run: flutter build apk --release
 
       - name: Build AAB (Release)
-        if: ${{ (github.event.inputs.buildType == 'aab' || github.event.inputs.buildType == 'both') && secrets.KEYSTORE_B64 != '' }}
+        if: ${{ github.event.inputs.buildType == 'aab' || github.event.inputs.buildType == 'both' }}
         env:
-          ANDROID_KEYSTORE_FILE: android/app/upload-keystore.jks
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.KEYSTORE_B64 }}
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           ANDROID_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           ANDROID_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-        run: flutter build appbundle --release
-
-      - name: Build AAB (Release, sem chave - assinatura debug)
-        if: ${{ (github.event.inputs.buildType == 'aab' || github.event.inputs.buildType == 'both') && secrets.KEYSTORE_B64 == '' }}
         run: flutter build appbundle --release
 
       - name: Upload APK

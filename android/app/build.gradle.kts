@@ -1,4 +1,5 @@
 import java.util.Properties
+import java.util.Base64
 
 plugins {
     id("com.android.application")
@@ -7,21 +8,64 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
-// Chave de assinatura: lê de android/key.properties (build local) ou de
-// variáveis de ambiente (CI). Fora do repositório — ver .gitignore.
+// ============================================================
+// CONFIGURAÇÃO DE ASSINATURA
+//
+// Fontes da chave, em ordem de precedência:
+//   1. android/key.properties          (build local)   → storeFile/storePassword/keyAlias/keyPassword
+//   2. ANDROID_KEYSTORE_BASE64 + senhas (CI/GitHub)    → keystore decodificada do secret
+//   3. ANDROID_KEYSTORE_FILE + senhas  (CI/GitHub)     → caminho para o arquivo .jks
+//
+// Se nada for encontrado, o release usa a assinatura DEBUG
+// (permite `flutter build apk --release` local sem chave).
+//
 // Obs.: nomes locais distintos de `storeFile`/`storePassword`/etc. porque,
 // dentro do closure `signingConfigs { create("release") }`, o receiver é o
 // SigningConfig e um identificador igual apontaria pra propriedade dele (null).
+// ============================================================
+
+// 1. Tenta ler key.properties (build local)
 val keystoreProperties = Properties()
 val keystorePropertiesFile = rootProject.file("key.properties")
 if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(keystorePropertiesFile.inputStream())
 }
-val keystoreFilePath = keystoreProperties.getProperty("storeFile") ?: System.getenv("ANDROID_KEYSTORE_FILE")
-val keystoreStorePassword = keystoreProperties.getProperty("storePassword") ?: System.getenv("ANDROID_KEYSTORE_PASSWORD")
-val keystoreKeyAlias = keystoreProperties.getProperty("keyAlias") ?: System.getenv("ANDROID_KEY_ALIAS")
-val keystoreKeyPassword = keystoreProperties.getProperty("keyPassword") ?: System.getenv("ANDROID_KEY_PASSWORD")
-val hasReleaseKey = keystoreFilePath != null
+
+// 2. Resolve a senha/alias (key.properties > env vars)
+val keystoreStorePassword = keystoreProperties.getProperty("storePassword")
+    ?: System.getenv("ANDROID_KEYSTORE_PASSWORD")
+val keystoreKeyAlias = keystoreProperties.getProperty("keyAlias")
+    ?: System.getenv("ANDROID_KEY_ALIAS")
+val keystoreKeyPassword = keystoreProperties.getProperty("keyPassword")
+    ?: System.getenv("ANDROID_KEY_PASSWORD")
+
+// 3. Resolve o arquivo da keystore
+//    a) base64 (secret do GitHub) → decodifica para build/keystores/
+//    b) key.properties storeFile
+//    c) ANDROID_KEYSTORE_FILE (caminho no runner)
+var keystoreFilePath: String? = null
+val keystoreBase64 = System.getenv("ANDROID_KEYSTORE_BASE64")
+if (!keystoreBase64.isNullOrBlank()) {
+    try {
+        val keystoreDir = File(project.buildDir, "keystores").apply { mkdirs() }
+        val decodedFile = File(keystoreDir, "upload-keystore.jks")
+        decodedFile.writeBytes(Base64.getDecoder().decode(keystoreBase64))
+        decodedFile.setReadable(true, false)
+        keystoreFilePath = decodedFile.absolutePath
+        logger.lifecycle("Keystore: decodificada do ANDROID_KEYSTORE_BASE64 -> ${decodedFile.absolutePath}")
+    } catch (e: Exception) {
+        logger.warn("Keystore: falha ao decodificar ANDROID_KEYSTORE_BASE64 -> ${e.message}")
+    }
+}
+if (keystoreFilePath == null) {
+    keystoreFilePath = keystoreProperties.getProperty("storeFile")
+        ?: System.getenv("ANDROID_KEYSTORE_FILE")
+}
+
+val hasReleaseKey = keystoreFilePath != null &&
+    keystoreStorePassword != null &&
+    keystoreKeyAlias != null &&
+    keystoreKeyPassword != null
 
 android {
     namespace = "com.redstar.painel"
