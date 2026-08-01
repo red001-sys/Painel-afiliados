@@ -7,6 +7,11 @@ on:
 jobs:
   build-android:
     runs-on: ubuntu-latest
+    env:
+      ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+      ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+      ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+      ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
 
     steps:
       - uses: actions/checkout@v4
@@ -21,38 +26,29 @@ jobs:
           java-version: '17'
 
       - name: Decode keystore
-        if: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
-        env:
-          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        if: env.ANDROID_KEYSTORE_BASE64 != ''
         run: |
-          echo "$KEYSTORE_BASE64" | base64 -d > android/app/upload-keystore.jks
+          echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > android/app/upload-keystore.jks
 
       - name: Verify keystore alias
-        if: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
-        env:
-          STORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+        if: env.ANDROID_KEYSTORE_BASE64 != ''
         run: |
           echo "Aliases encontrados na keystore:"
-          keytool -list -keystore android/app/upload-keystore.jks -storepass "$STORE_PASSWORD" | tee /tmp/aliases.txt
-          if ! grep -qi "^Alias name: $KEY_ALIAS" /tmp/aliases.txt; then
-            echo "::error::O secret ANDROID_KEY_ALIAS ('$KEY_ALIAS') não corresponde a nenhum alias dentro da keystore decodificada. Confira os aliases listados acima e corrija o secret ANDROID_KEY_ALIAS (ou ANDROID_KEYSTORE_BASE64, se a keystore estiver desatualizada)."
+          keytool -list -keystore android/app/upload-keystore.jks -storepass "$ANDROID_KEYSTORE_PASSWORD" | tee /tmp/aliases.txt
+          if ! grep -qi "^Alias name: $ANDROID_KEY_ALIAS" /tmp/aliases.txt; then
+            echo "::error::O secret ANDROID_KEY_ALIAS ('$ANDROID_KEY_ALIAS') não corresponde a nenhum alias dentro da keystore decodificada. Confira os aliases listados acima e corrija o secret ANDROID_KEY_ALIAS (ou ANDROID_KEYSTORE_BASE64, se a keystore estiver desatualizada)."
             exit 1
           fi
-          echo "Alias '$KEY_ALIAS' confirmado na keystore."
+          echo "Alias '$ANDROID_KEY_ALIAS' confirmado na keystore."
 
       - name: Create key.properties
-        if: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
-        env:
-          STORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
-          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        if: env.ANDROID_KEYSTORE_BASE64 != ''
         run: |
           cat > android/key.properties <<EOF
           storeFile=upload-keystore.jks
-          storePassword=$STORE_PASSWORD
-          keyAlias=$KEY_ALIAS
-          keyPassword=$KEY_PASSWORD
+          storePassword=$ANDROID_KEYSTORE_PASSWORD
+          keyAlias=$ANDROID_KEY_ALIAS
+          keyPassword=$ANDROID_KEY_PASSWORD
           EOF
 
       - run: flutter pub get
