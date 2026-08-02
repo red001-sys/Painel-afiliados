@@ -11,6 +11,7 @@ import '../../providers/auth_provider.dart';
 import '../../providers/affiliate_provider.dart';
 import '../../providers/theme_provider.dart';
 import 'bank_data_screen.dart';
+import 'change_password_screen.dart';
 import 'help_support_screen.dart';
 import 'my_links_screen.dart';
 import 'personal_data_screen.dart';
@@ -74,6 +75,15 @@ class ProfileScreen extends ConsumerWidget {
             onTap: () {
               Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => const MyLinksScreen()),
+              );
+            },
+          ),
+          _ProfileMenuItem(
+            icon: Icons.lock_outline_rounded,
+            title: 'Alterar Senha',
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const ChangePasswordScreen()),
               );
             },
           ),
