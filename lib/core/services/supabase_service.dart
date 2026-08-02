@@ -7,6 +7,7 @@ abstract final class SupabaseService {
     await Supabase.initialize(
       url: AppConfig.supabaseUrl,
       anonKey: AppConfig.supabaseAnonKey,
+      authFlowType: AuthFlowType.pkce,
     );
   }
 

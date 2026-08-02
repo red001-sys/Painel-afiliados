@@ -28,6 +28,22 @@ class AuthRepository {
     );
   }
 
+  Future<void> resetPasswordForEmail({
+    required String email,
+    required String redirectTo,
+  }) async {
+    await _client.auth.resetPasswordForEmail(
+      email: email,
+      redirectTo: redirectTo,
+    );
+  }
+
+  Future<void> updatePassword({required String newPassword}) async {
+    await _client.auth.updateUser(
+      UserAttributes(password: newPassword),
+    );
+  }
+
   Future<void> signOut() async {
     await _client.auth.signOut();
   }

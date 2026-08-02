@@ -4,6 +4,8 @@ import '../../screens/admin_shell/admin_shell_screen.dart';
 import '../../screens/admin/affiliate_detail/affiliate_detail_shell.dart';
 import '../../screens/dashboard/dashboard_screen.dart';
 import '../../screens/first_access/first_access_screen.dart';
+import '../../screens/forgot_password/forgot_password_screen.dart';
+import '../../screens/forgot_password/reset_password_screen.dart';
 import '../../screens/history/history_screen.dart';
 import '../../screens/login/login_screen.dart';
 import '../../screens/profile/profile_screen.dart';
@@ -13,6 +15,8 @@ abstract final class AppRouter {
   static const String splash = '/';
   static const String login = '/login';
   static const String firstAccess = '/first-access';
+  static const String forgotPassword = '/forgot-password';
+  static const String resetPassword = '/reset-password';
   static const String dashboard = '/dashboard';
   static const String history = '/history';
   static const String profile = '/profile';
@@ -27,6 +31,10 @@ abstract final class AppRouter {
         return _buildRoute(const LoginScreen(), settings);
       case firstAccess:
         return _buildRoute(const FirstAccessScreen(), settings);
+      case forgotPassword:
+        return _buildRoute(const ForgotPasswordScreen(), settings);
+      case resetPassword:
+        return _buildRoute(const ResetPasswordScreen(), settings);
       case dashboard:
         return _buildRoute(const DashboardScreen(), settings);
       case history:

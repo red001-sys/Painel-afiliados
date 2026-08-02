@@ -1,10 +1,12 @@
 import 'dart:async';
 
+import 'package:app_links/app_links.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'core/constants/app_config.dart';
 import 'core/routes/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'providers/admin_provider.dart';
@@ -25,6 +27,8 @@ class CJApp extends ConsumerStatefulWidget {
 
 class _CJAppState extends ConsumerState<CJApp> {
   late final StreamSubscription<AuthState> _authSubscription;
+  StreamSubscription<Uri>? _linkSubscription;
+  final _appLinks = AppLinks();
 
   @override
   void initState() {
@@ -52,14 +56,59 @@ class _CJAppState extends ConsumerState<CJApp> {
           debugPrint('[APP] signedIn');
         } else if (event == AuthChangeEvent.tokenRefreshed) {
           debugPrint('[APP] tokenRefreshed');
+        } else if (event == AuthChangeEvent.passwordRecovery) {
+          debugPrint('[APP] passwordRecovery → navigating to reset password');
+          if (mounted) {
+            Navigator.of(context).pushNamedAndRemoveUntil(
+              AppRouter.resetPassword,
+              (route) => false,
+            );
+          }
         }
       },
     );
+    _initDeepLinks();
+  }
+
+  Future<void> _initDeepLinks() async {
+    try {
+      final initialUri = await _appLinks.getInitialLink();
+      if (initialUri != null) {
+        debugPrint('[APP] Initial deep link: $initialUri');
+        _handleDeepLink(initialUri);
+      }
+      _linkSubscription = _appLinks.uriLinkStream.listen((uri) {
+        debugPrint('[APP] Deep link received: $uri');
+        _handleDeepLink(uri);
+      });
+    } catch (e) {
+      debugPrint('[APP] Deep link init error: $e');
+    }
+  }
+
+  void _handleDeepLink(Uri uri) async {
+    debugPrint('[APP] Deep link received: $uri');
+    try {
+      await Supabase.instance.client.auth.getSessionFromUrl(uri);
+      debugPrint('[APP] getSessionFromUrl OK');
+    } catch (e) {
+      debugPrint('[APP] getSessionFromUrl error (no auth tokens?): $e');
+    }
+    if (uri.scheme == AppConfig.passwordResetScheme) {
+      debugPrint('[APP] Password reset deep link detected');
+      if (mounted) {
+        Navigator.of(context).pushNamedAndRemoveUntil(
+          AppRouter.resetPassword,
+          (route) => false,
+        );
+      }
+    }
   }
 
   @override
   void dispose() {
     _authSubscription.cancel();
+    _linkSubscription?.cancel();
     super.dispose();
   }
 

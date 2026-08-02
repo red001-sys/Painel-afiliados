@@ -42,6 +42,7 @@ dependencies:
   file_picker: ^8.1.4
   image_picker: ^1.1.2
   shared_preferences: ^2.3.0
+  app_links: ^6.4.0
 
 # Pinned below 2.3.0: that version switched path_provider_android's
 # internal implementation to JNI, which pulls in a CMake/NDK native build

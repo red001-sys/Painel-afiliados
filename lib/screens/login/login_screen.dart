@@ -224,6 +224,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ),
               SizedBox(height: AppTheme.spacingMD),
 
+              // Forgot password
+              TextButton(
+                onPressed: loginState.isLoading
+                    ? null
+                    : () => Navigator.of(context).pushNamed(AppRouter.forgotPassword),
+                child: const Text('Esqueceu sua senha?'),
+              ),
+              SizedBox(height: AppTheme.spacingMD),
+
               // Footer
               Text(
                 'RedStar',
