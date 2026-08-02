@@ -7,6 +7,7 @@ import '../../core/constants/app_colors.dart';
 import '../../core/theme/app_theme.dart';
 import '../../models/video.dart';
 import '../../providers/video_provider.dart';
+import '../../widgets/copyright_footer.dart';
 import '../../widgets/video_preview.dart';
 
 class AdminVideosScreen extends ConsumerStatefulWidget {
@@ -73,12 +74,17 @@ class _AdminVideosScreenState extends ConsumerState<AdminVideosScreen> {
                 onRefresh: () async => ref.invalidate(videosProvider),
                 child: ListView.builder(
                   padding: const EdgeInsets.all(16),
-                  itemCount: videos.length,
-                  itemBuilder: (context, index) => _VideoTile(
-                    video: videos[index],
-                    onEdit: () => _showVideoDialog(context, ref, video: videos[index]),
-                    onDelete: () => _deleteVideo(context, ref, videos[index]),
-                  ),
+                  itemCount: videos.length + 1,
+                  itemBuilder: (context, index) {
+                    if (index == videos.length) {
+                      return const CopyrightFooter();
+                    }
+                    return _VideoTile(
+                      video: videos[index],
+                      onEdit: () => _showVideoDialog(context, ref, video: videos[index]),
+                      onDelete: () => _deleteVideo(context, ref, videos[index]),
+                    );
+                  },
                 ),
               );
             },

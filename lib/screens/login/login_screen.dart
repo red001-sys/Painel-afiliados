@@ -226,7 +226,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
               // Footer
               Text(
-                'EcoFlow × RedStar',
+                'RedStar',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 13,

@@ -5,6 +5,7 @@ import '../../core/constants/app_colors.dart';
 import '../../core/routes/app_router.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/theme_provider.dart';
+import '../../widgets/copyright_footer.dart';
 
 class AdminSettingsScreen extends ConsumerWidget {
   const AdminSettingsScreen({super.key});
@@ -142,6 +143,7 @@ class AdminSettingsScreen extends ConsumerWidget {
             ),
           ),
         ),
+        const CopyrightFooter(),
       ],
     );
   }

@@ -55,9 +55,9 @@ class ProductRepository {
     await _client.from('products').update({'ativo': ativo}).eq('id', id);
   }
 
-  /// Dispara a edge function que sincroniza o catálogo EcoFlow (USD) da CJ.
+  /// Dispara a edge function que sincroniza o catálogo de produtos (USD) da CJ.
   Future<Map<String, dynamic>> syncFromCJ() async {
-    final response = await _client.functions.invoke('sync-ecoflow-products');
+    final response = await _client.functions.invoke('sync-products');
     return Map<String, dynamic>.from(response.data as Map);
   }
 }

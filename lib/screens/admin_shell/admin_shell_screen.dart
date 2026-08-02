@@ -178,21 +178,6 @@ class _AdminShellScreenState extends State<AdminShellScreen> {
               ],
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: Column(
-              children: [
-                Text(
-                  '© RedStar 2026',
-                  style: TextStyle(fontSize: 11, color: Colors.grey[500]),
-                ),
-                Text(
-                  'Todos os direitos reservados',
-                  style: TextStyle(fontSize: 11, color: Colors.grey[500]),
-                ),
-              ],
-            ),
-          ),
         ],
       ),
     );

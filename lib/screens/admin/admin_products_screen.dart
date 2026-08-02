@@ -5,6 +5,7 @@ import '../../core/constants/app_colors.dart';
 import '../../core/theme/app_theme.dart';
 import '../../models/product.dart';
 import '../../providers/product_provider.dart';
+import '../../widgets/copyright_footer.dart';
 
 enum _StatusFilter { all, active, inactive }
 
@@ -42,7 +43,7 @@ class _AdminProductsScreenState extends ConsumerState<AdminProductsScreen> {
               const SizedBox(width: 8),
               IconButton.filledTonal(
                 onPressed: _syncing ? null : () => _runSync(context),
-                tooltip: 'Sincronizar produtos EcoFlow da CJ',
+                tooltip: 'Sincronizar produtos da CJ',
                 icon: _syncing
                     ? const SizedBox(
                         width: 20,
@@ -126,13 +127,18 @@ class _AdminProductsScreenState extends ConsumerState<AdminProductsScreen> {
                 },
                 child: ListView.builder(
                   padding: const EdgeInsets.all(16),
-                  itemCount: filtered.length,
-                  itemBuilder: (context, index) => _ProductTile(
-                    product: filtered[index],
-                    onEdit: () => _showProductDialog(context, ref, product: filtered[index]),
-                    onDelete: () => _deleteProduct(context, ref, filtered[index]),
-                    onToggleAtivo: () => _toggleAtivo(context, ref, filtered[index]),
-                  ),
+                  itemCount: filtered.length + 1,
+                  itemBuilder: (context, index) {
+                    if (index == filtered.length) {
+                      return const CopyrightFooter();
+                    }
+                    return _ProductTile(
+                      product: filtered[index],
+                      onEdit: () => _showProductDialog(context, ref, product: filtered[index]),
+                      onDelete: () => _deleteProduct(context, ref, filtered[index]),
+                      onToggleAtivo: () => _toggleAtivo(context, ref, filtered[index]),
+                    );
+                  },
                 ),
               );
             },
@@ -577,7 +583,7 @@ class _SyncProgressDialog extends StatelessWidget {
             child: CircularProgressIndicator(strokeWidth: 2.5),
           ),
           SizedBox(width: 16),
-          Expanded(child: Text('Sincronizando catálogo EcoFlow...')),
+          Expanded(child: Text('Sincronizando catálogo...')),
         ],
       ),
     );
@@ -604,7 +610,7 @@ class _SyncResultDialog extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('$total produtos no catálogo EcoFlow (US)'),
+          Text('$total produtos no catálogo (US)'),
           const SizedBox(height: 12),
           _ResultRow(
             label: 'Novos importados',

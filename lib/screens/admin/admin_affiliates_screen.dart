@@ -10,6 +10,7 @@ import '../../core/routes/app_router.dart';
 import '../../core/theme/app_theme.dart';
 import '../../models/affiliate.dart';
 import '../../providers/admin_provider.dart';
+import '../../widgets/copyright_footer.dart';
 
 class AdminAffiliatesScreen extends ConsumerStatefulWidget {
   const AdminAffiliatesScreen({super.key});
@@ -100,8 +101,11 @@ class _AdminAffiliatesScreenState extends ConsumerState<AdminAffiliatesScreen> {
                 onRefresh: () async => ref.invalidate(adminAffiliatesWithStatsProvider),
                 child: ListView.builder(
                   padding: const EdgeInsets.all(16),
-                  itemCount: filtered.length,
+                  itemCount: filtered.length + 1,
                   itemBuilder: (context, index) {
+                    if (index == filtered.length) {
+                      return const CopyrightFooter();
+                    }
                     final row = filtered[index];
                     final affiliate = row['affiliate'] as Affiliate;
                     final salesCount = row['salesCount'] as int;

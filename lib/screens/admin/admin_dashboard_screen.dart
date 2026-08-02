@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/theme/app_theme.dart';
 import '../../providers/admin_provider.dart';
+import '../../widgets/copyright_footer.dart';
 
 class AdminDashboardScreen extends ConsumerWidget {
   const AdminDashboardScreen({super.key});
@@ -87,6 +88,7 @@ class AdminDashboardScreen extends ConsumerWidget {
             const SizedBox(height: 20),
             _LastSyncCard(
                 syncData: data['lastSync'] as Map<String, dynamic>?),
+            const CopyrightFooter(),
           ],
         ),
       ),

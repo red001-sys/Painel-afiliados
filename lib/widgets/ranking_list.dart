@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/ranking_entry.dart';
 import '../providers/ranking_provider.dart';
+import 'copyright_footer.dart';
 
 class RankingList extends ConsumerWidget {
   const RankingList({super.key});
@@ -29,8 +30,11 @@ class RankingList extends ConsumerWidget {
           onRefresh: () async => ref.invalidate(rankingProvider),
           child: ListView.builder(
             padding: const EdgeInsets.all(16),
-            itemCount: ranking.length,
+            itemCount: ranking.length + 1,
             itemBuilder: (context, index) {
+              if (index == ranking.length) {
+                return const CopyrightFooter();
+              }
               final entry = ranking[index];
               final position = index + 1;
               return _RankingTile(entry: entry, position: position);

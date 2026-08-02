@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/theme/app_theme.dart';
 import '../../providers/admin_provider.dart';
+import '../../widgets/copyright_footer.dart';
 
 class AdminSyncScreen extends ConsumerStatefulWidget {
   const AdminSyncScreen({super.key});
@@ -123,6 +124,7 @@ class _AdminSyncScreenState extends ConsumerState<AdminSyncScreen> {
             );
           },
         ),
+        const CopyrightFooter(),
       ],
     );
   }
