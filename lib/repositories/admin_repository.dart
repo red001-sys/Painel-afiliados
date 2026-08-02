@@ -239,10 +239,9 @@ class AdminRepository {
     int salesCount = 0;
 
     for (final sale in sales) {
-      final commission =
-          (sale['commission_amount'] as num?)?.toDouble() ?? 0;
       final amount =
           (sale['sale_amount'] as num?)?.toDouble() ?? 0;
+      final commission = amount * 0.04;
       final status = sale['status'] as String?;
 
       salesCount++;

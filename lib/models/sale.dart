@@ -31,6 +31,15 @@ class Sale {
   final DateTime? lockedDate;
   final DateTime createdAt;
 
+  /// Percentual de comissão do afiliado sobre o valor da venda.
+  static const double affiliateCommissionRate = 0.04;
+
+  /// Comissão do afiliado: 4% do valor da venda.
+  /// O valor reportado pela CJ (commissionAmount) corresponde ao total
+  /// (5%), do qual o afiliado fica com 4% e o restante (1%) é da conta
+  /// de afiliados do admin.
+  double get affiliateCommission => (saleAmount ?? 0) * affiliateCommissionRate;
+
   factory Sale.fromJson(Map<String, dynamic> json) {
     return Sale(
       id: json['id'] as String,

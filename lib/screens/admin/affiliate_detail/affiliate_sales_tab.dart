@@ -140,7 +140,7 @@ class _AffiliateSalesTabState extends ConsumerState<AffiliateSalesTab> {
               final todayValue = todaySales.fold<double>(0, (sum, s) =>
                   sum + ((s['sale_amount'] as num?)?.toDouble() ?? 0));
               final todayCommission = todaySales.fold<double>(0, (sum, s) =>
-                  sum + ((s['commission_amount'] as num?)?.toDouble() ?? 0));
+                  sum + (((s['sale_amount'] as num?)?.toDouble() ?? 0) * 0.04));
 
               final totalPages = (sales.length / _pageSize).ceil();
               final pageSales = sales.skip(_page * _pageSize).take(_pageSize).toList();
@@ -326,7 +326,7 @@ class _SaleTile extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final status = sale['status'] as String? ?? '';
     final saleAmount = (sale['sale_amount'] as num?)?.toDouble() ?? 0;
-    final commissionAmount = (sale['commission_amount'] as num?)?.toDouble() ?? 0;
+    final commissionAmount = saleAmount * 0.04;
     final saleDate = sale['sale_date'] != null
         ? DateTime.tryParse(sale['sale_date'] as String)
         : null;

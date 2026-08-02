@@ -255,7 +255,7 @@ class _SaleTile extends StatelessWidget {
                 ),
                 const Spacer(),
                 Text(
-                  'Comissão: R\$ ${(sale.commissionAmount ?? 0).toStringAsFixed(2)}',
+                  'Comissão: R\$ ${sale.affiliateCommission.toStringAsFixed(2)}',
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,

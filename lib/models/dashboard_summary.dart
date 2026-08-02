@@ -23,7 +23,7 @@ class DashboardSummary {
 
     for (final s in sales) {
       final status = s.status?.toLowerCase() ?? '';
-      final commission = s.commissionAmount ?? 0;
+      final commission = s.affiliateCommission;
       final saleAmount = s.saleAmount ?? 0;
 
       if (status == 'approved') {

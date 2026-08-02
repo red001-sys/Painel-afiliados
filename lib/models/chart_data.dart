@@ -18,7 +18,7 @@ class DailyChartPoint {
       final dayKey = DateTime(
         s.saleDate!.year, s.saleDate!.month, s.saleDate!.day,
       ).millisecondsSinceEpoch;
-      dayTotals[dayKey] = (dayTotals[dayKey] ?? 0) + (s.commissionAmount ?? 0);
+      dayTotals[dayKey] = (dayTotals[dayKey] ?? 0) + s.affiliateCommission;
     }
 
     return days.map((date) {
@@ -44,7 +44,7 @@ class MonthlyChartPoint {
     for (final s in sales) {
       if (s.saleDate == null) continue;
       final key = s.saleDate!.year * 100 + s.saleDate!.month;
-      monthTotals[key] = (monthTotals[key] ?? 0) + (s.commissionAmount ?? 0);
+      monthTotals[key] = (monthTotals[key] ?? 0) + s.affiliateCommission;
     }
 
     return months.map((month) {
