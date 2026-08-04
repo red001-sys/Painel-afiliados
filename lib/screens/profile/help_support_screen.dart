@@ -10,6 +10,8 @@ class HelpSupportScreen extends StatelessWidget {
   static const _supportEmail = 'redstarsuporteof@gmail.com';
   static const _supportWhatsapp = '5585998271418';
   static const _supportPhone = '+55 85 99827-1418';
+  static const _privacyPolicyUrl =
+      'https://sites.google.com/view/poltica-de-privacidade-redstar/in%C3%ADcio';
 
   @override
   Widget build(BuildContext context) {
@@ -49,6 +51,16 @@ class HelpSupportScreen extends StatelessWidget {
               subtitle: const Text(_supportPhone),
               trailing: const Icon(Icons.chevron_right_rounded),
               onTap: () => _openPhone(context),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.shield_outlined, color: Color(0xFF2196F3)),
+              title: const Text('Política de Privacidade'),
+              subtitle: const Text('Saiba como tratamos seus dados'),
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () => _openPrivacyPolicy(context),
             ),
           ),
           SizedBox(height: AppTheme.spacingLG),
@@ -107,6 +119,16 @@ class HelpSupportScreen extends StatelessWidget {
     if (!ok && context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Não foi possível abrir o discador')),
+      );
+    }
+  }
+
+  Future<void> _openPrivacyPolicy(BuildContext context) async {
+    final uri = Uri.parse(_privacyPolicyUrl);
+    final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (!ok && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Não foi possível abrir a Política de Privacidade')),
       );
     }
   }

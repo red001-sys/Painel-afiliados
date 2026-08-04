@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Política de Privacidade — RedStar Vendedores</title>
+<style>
+  :root {
+    --green: #2196F3;
+    --green-dark: #1565C0;
+    --green-surface: #E3F2FD;
+    --ink: #1A2332;
+    --ink-soft: #55606E;
+    --paper: #F7FAFD;
+    --card: #FFFFFF;
+    --line: #E1E7EE;
+    --radius: 14px;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: var(--green-dark); }
+
+  .topbar {
+    background: linear-gradient(135deg, var(--green-dark), var(--green));
+    color: #fff;
+    padding: 28px 20px 60px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .topbar::after {
+    content: "";
+    position: absolute;
+    right: -60px;
+    top: -60px;
+    width: 220px;
+    height: 220px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.08);
+  }
+
+  .topbar-inner {
+    max-width: 760px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: 0.02em;
+    opacity: 0.92;
+  }
+
+  .brand-mark {
+    width: 26px;
+    height: 26px;
+    border-radius: 8px;
+    background: #fff;
+    color: var(--green-dark);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 14px;
+  }
+
+  .topbar h1 {
+    margin: 22px 0 6px;
+    font-size: clamp(24px, 5vw, 34px);
+    font-weight: 800;
+    letter-spacing: -0.01em;
+  }
+
+  .topbar p {
+    margin: 0;
+    opacity: 0.88;
+    font-size: 14px;
+  }
+
+  .wrap {
+    max-width: 760px;
+    margin: -36px auto 0;
+    padding: 0 20px 60px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .contact-card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    box-shadow: 0 12px 30px -18px rgba(10, 40, 90, 0.35);
+    display: grid;
+    gap: 10px;
+  }
+
+  .contact-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+  }
+
+  .contact-row .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--green);
+    flex-shrink: 0;
+  }
+
+  .contact-row a { color: var(--ink); text-decoration: none; font-weight: 600; }
+  .contact-row a:hover { color: var(--green-dark); }
+
+  nav.toc {
+    margin-top: 22px;
+    background: var(--green-surface);
+    border-radius: var(--radius);
+    padding: 6px;
+  }
+
+  nav.toc summary {
+    cursor: pointer;
+    list-style: none;
+    padding: 12px 14px;
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--green-dark);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  nav.toc summary::-webkit-details-marker { display: none; }
+
+  nav.toc summary::after {
+    content: "▾";
+    transition: transform 0.2s ease;
+  }
+
+  nav.toc[open] summary::after { transform: rotate(180deg); }
+
+  .toc-list {
+    padding: 4px 6px 10px;
+    display: grid;
+    gap: 2px;
+  }
+
+  .toc-list a {
+    display: block;
+    padding: 8px 10px;
+    border-radius: 8px;
+    font-size: 13.5px;
+    color: var(--ink-soft);
+    text-decoration: none;
+  }
+
+  .toc-list a:hover { background: rgba(33,150,243,0.12); color: var(--green-dark); }
+
+  main {
+    margin-top: 28px;
+    display: grid;
+    gap: 16px;
+  }
+
+  section.card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 22px 22px 20px;
+    scroll-margin-top: 16px;
+  }
+
+  section.card h2 {
+    margin: 0 0 12px;
+    font-size: 17px;
+    font-weight: 800;
+    color: var(--green-dark);
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+
+  section.card h2 .num {
+    font-variant-numeric: tabular-nums;
+    color: var(--green);
+    font-size: 13px;
+    font-weight: 800;
+    background: var(--green-surface);
+    border-radius: 6px;
+    padding: 2px 7px;
+  }
+
+  section.card h3 {
+    font-size: 14.5px;
+    font-weight: 700;
+    color: var(--ink);
+    margin: 16px 0 6px;
+  }
+
+  section.card p, section.card li {
+    font-size: 14.5px;
+    color: var(--ink-soft);
+  }
+
+  section.card ul, section.card ol {
+    margin: 6px 0;
+    padding-left: 20px;
+  }
+
+  section.card li { margin-bottom: 4px; }
+
+  .callout {
+    margin-top: 12px;
+    background: var(--green-surface);
+    border-left: 3px solid var(--green);
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-size: 13.5px;
+    color: var(--ink);
+  }
+
+  .callout strong { color: var(--green-dark); }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+    margin-top: 8px;
+  }
+
+  th, td {
+    text-align: left;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--line);
+    color: var(--ink-soft);
+  }
+
+  th { color: var(--ink); font-weight: 700; }
+
+  footer {
+    text-align: center;
+    margin-top: 36px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+    font-size: 13px;
+    color: var(--ink-soft);
+  }
+
+  footer .brand {
+    justify-content: center;
+    color: var(--ink);
+    margin-bottom: 6px;
+  }
+
+  footer .brand .brand-mark {
+    background: var(--green);
+    color: #fff;
+  }
+
+  @media (min-width: 860px) {
+    .wrap { margin-top: -44px; }
+    nav.toc { display: block; }
+    nav.toc summary { pointer-events: none; }
+    nav.toc summary::after { display: none; }
+    .toc-list { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <span class="brand-mark">R</span>
+        RedStar Vendedores
+      </div>
+      <h1>Política de Privacidade</h1>
+      <p>Última atualização: 02 de agosto de 2026</p>
+    </div>
+  </div>
+
+  <div class="wrap">
+
+    <div class="contact-card">
+      <div class="contact-row"><span class="dot"></span> <a href="mailto:redstarsuporteof@gmail.com">redstarsuporteof@gmail.com</a></div>
+      <div class="contact-row"><span class="dot"></span> <a href="https://wa.me/5585998271418" target="_blank" rel="noopener">+55 85 99827-1418</a></div>
+      <div class="contact-row"><span class="dot"></span> <a href="https://www.instagram.com/r.e.d_s.t.a.r" target="_blank" rel="noopener">@r.e.d_s.t.a.r</a></div>
+      <div class="contact-row"><span class="dot"></span> Atendimento em dias úteis, das 9h às 18h (horário de Brasília)</div>
+    </div>
+
+    <details class="toc" open>
+      <summary>Sumário</summary>
+      <div class="toc-list">
+        <a href="#s1">1. Controlador dos dados</a>
+        <a href="#s2">2. Dados que coletamos</a>
+        <a href="#s3">3. Como utilizamos seus dados</a>
+        <a href="#s4">4. Compartilhamento de dados</a>
+        <a href="#s5">5. Retenção de dados</a>
+        <a href="#s6">6. Segurança dos dados</a>
+        <a href="#s7">7. Seus direitos (LGPD)</a>
+        <a href="#s8">8. Transferência internacional</a>
+        <a href="#s9">9. Privacidade de menores</a>
+        <a href="#s10">10. Alterações desta Política</a>
+        <a href="#s11">11. Contato</a>
+      </div>
+    </details>
+
+    <main>
+
+      <section class="card" id="s1">
+        <h2><span class="num">01</span>Controlador dos dados</h2>
+        <p>O aplicativo RedStar Vendedores é um painel de subafiliação que permite a você acompanhar suas vendas e comissões geradas no programa de afiliados.</p>
+        <p>Esta Política de Privacidade descreve como o aplicativo <strong>RedStar Vendedores</strong> coleta, utiliza, armazena e protege os dados pessoais dos usuários, em conformidade com a Lei Geral de Proteção de Dados (LGPD – Lei nº 13.709/2018) e demais legislações aplicáveis.</p>
+        <p>Ao utilizar o aplicativo, você declara ter lido e compreendido esta Política de Privacidade e concorda com o tratamento dos seus dados conforme aqui descrito.</p>
+      </section>
+
+      <section class="card" id="s2">
+        <h2><span class="num">02</span>Dados que coletamos</h2>
+
+        <h3>2.1 Dados fornecidos por você</h3>
+        <ul>
+          <li><strong>Dados de cadastro e autenticação:</strong> e-mail e senha, utilizados para criar e acessar sua conta. A senha é armazenada de forma criptografada (hash) e nunca em texto puro.</li>
+          <li><strong>Dados pessoais:</strong> nome e número de WhatsApp, informados voluntariamente na área "Dados Pessoais".</li>
+          <li><strong>Dados bancários:</strong> chave PIX, informada voluntariamente na área "Dados Bancários", utilizada exclusivamente para o pagamento das suas comissões.</li>
+          <li><strong>Foto de perfil (avatar):</strong> caso você opte por adicionar uma foto de perfil, ela é armazenada nos nossos servidores.</li>
+        </ul>
+
+        <h3>2.2 Dados gerados pelo uso</h3>
+        <ul>
+          <li><strong>Dados de desempenho e comissões:</strong> vendas, SID (identificador de subafiliado) e valores de comissão vinculados à sua conta, sincronizados a partir do programa de afiliados.</li>
+          <li><strong>Preferências do aplicativo:</strong> tema (claro/escuro) e ajustes locais, armazenados apenas no seu dispositivo.</li>
+        </ul>
+
+        <h3>2.3 Dados técnicos</h3>
+        <ul>
+          <li><strong>Dados de conexão e rede:</strong> registros básicos necessários pro funcionamento seguro do serviço (ex.: endereço IP, dados de acesso e data/hora), usados para segurança, prevenção a fraudes e diagnóstico técnico.</li>
+        </ul>
+
+        <div class="callout">
+          <strong>Importante:</strong> o aplicativo <strong>não</strong> coleta dados de localização GPS, <strong>não</strong> utiliza cookies de rastreamento, <strong>não</strong> exibe anúncios publicitários e <strong>não</strong> realiza monitoramento de comportamento fora do aplicativo.
+        </div>
+      </section>
+
+      <section class="card" id="s3">
+        <h2><span class="num">03</span>Como utilizamos seus dados</h2>
+        <p>Seus dados são utilizados exclusivamente para:</p>
+        <ul>
+          <li>Criar, autenticar e gerenciar sua conta;</li>
+          <li>Exibir seus dados de vendas, links e comissões no painel;</li>
+          <li>Processar o pagamento de comissões via chave PIX cadastrada;</li>
+          <li>Prestar suporte técnico e atendimento ao usuário;</li>
+          <li>Garantir a segurança do serviço e prevenir fraudes;</li>
+          <li>Cumprir obrigações legais, regulatórias e judiciais;</li>
+          <li>Melhorar a experiência e o funcionamento do aplicativo.</li>
+        </ul>
+        <p>Não utilizamos seus dados para fins de publicidade direcionada nem os vendemos a terceiros.</p>
+      </section>
+
+      <section class="card" id="s4">
+        <h2><span class="num">04</span>Compartilhamento de dados</h2>
+        <p>Não vendemos, alugamos ou compartilhamos seus dados pessoais com terceiros para fins comerciais. Compartilhamos dados apenas nas seguintes situações:</p>
+        <table>
+          <tr><th>Com quem</th><th>Por quê</th></tr>
+          <tr><td>Supabase (infraestrutura)</td><td>Armazenamento e autenticação, atuando como operador de dados, com criptografia em trânsito e em repouso</td></tr>
+          <tr><td>CJ Affiliate</td><td>Origem dos dados de vendas e comissões exibidos no painel</td></tr>
+          <tr><td>Autoridades públicas</td><td>Mediante ordem judicial, solicitação legal ou exigência de lei</td></tr>
+          <tr><td>Terceiros com sua autorização</td><td>Sempre com consentimento prévio e expresso</td></tr>
+        </table>
+      </section>
+
+      <section class="card" id="s5">
+        <h2><span class="num">05</span>Retenção de dados</h2>
+        <p>Mantemos seus dados apenas pelo tempo necessário para as finalidades descritas nesta Política, observados os prazos legais e contratuais:</p>
+        <ul>
+          <li><strong>Dados da conta:</strong> mantidos enquanto sua conta estiver ativa.</li>
+          <li><strong>Dados de transações e comissões:</strong> mantidos conforme exigência legal e para fins de auditoria financeira.</li>
+          <li><strong>Ao excluir a conta:</strong> os dados pessoais são removidos ou anonimizados, exceto aqueles cuja manutenção seja obrigatória por lei (ex.: obrigações fiscais).</li>
+        </ul>
+      </section>
+
+      <section class="card" id="s6">
+        <h2><span class="num">06</span>Segurança dos dados</h2>
+        <p>Adotamos medidas técnicas e organizacionais adequadas para proteger seus dados contra acessos não autorizados, perda, alteração ou divulgação indevida, incluindo:</p>
+        <ul>
+          <li>Criptografia dos dados em trânsito (HTTPS/TLS) e em repouso;</li>
+          <li>Hash das senhas (nunca armazenadas em texto puro);</li>
+          <li>Controle de acesso baseado em perfis (usuário comum e administrador);</li>
+          <li>Monitoramento e auditoria de acessos ao sistema.</li>
+        </ul>
+        <p>Nenhum método de transmissão ou armazenamento é 100% seguro, mas trabalhamos continuamente para proteger suas informações.</p>
+      </section>
+
+      <section class="card" id="s7">
+        <h2><span class="num">07</span>Seus direitos (LGPD)</h2>
+        <p>Nos termos da LGPD, você pode, a qualquer momento, solicitar:</p>
+        <ol>
+          <li>Confirmação da existência de tratamento dos seus dados;</li>
+          <li>Acesso aos dados que tratamos sobre você;</li>
+          <li>Correção de dados incompletos, inexatos ou desatualizados;</li>
+          <li>Anonimização, bloqueio ou eliminação de dados desnecessários ou excessivos;</li>
+          <li>Portabilidade dos seus dados a outro fornecedor de serviço;</li>
+          <li>Eliminação dos dados tratados com base no seu consentimento;</li>
+          <li>Informação sobre compartilhamento de dados com terceiros;</li>
+          <li>Revogação do consentimento, quando aplicável;</li>
+          <li>Revisão de decisões automatizadas que afetem seus interesses.</li>
+        </ol>
+        <p>Para exercer esses direitos, entre em contato pelo e-mail <a href="mailto:redstarsuporteof@gmail.com">redstarsuporteof@gmail.com</a>. Responderemos no prazo de até <strong>15 (quinze) dias</strong>, conforme previsto na LGPD.</p>
+        <div class="callout">Você também pode, a qualquer momento, <strong>alterar sua senha</strong> diretamente no aplicativo (Perfil → Alterar Senha) ou <strong>recuperá-la</strong> pela tela de login ("Esqueceu sua senha?").</div>
+      </section>
+
+      <section class="card" id="s8">
+        <h2><span class="num">08</span>Transferência internacional de dados</h2>
+        <p>Os dados podem ser armazenados em servidores localizados no Brasil ou no exterior (incluindo provedores de nuvem). Em caso de transferência internacional, adotamos as salvaguardas adequadas para garantir o mesmo nível de proteção previsto na LGPD.</p>
+      </section>
+
+      <section class="card" id="s9">
+        <h2><span class="num">09</span>Privacidade de menores</h2>
+        <p>O aplicativo é destinado a maiores de 18 anos e não coletamos intencionalmente dados de crianças ou adolescentes. Caso identifiquemos o cadastro de menores, os dados serão excluídos imediatamente.</p>
+      </section>
+
+      <section class="card" id="s10">
+        <h2><span class="num">10</span>Alterações desta Política</h2>
+        <p>Esta Política pode ser atualizada periodicamente para refletir mudanças no serviço ou na legislação. A versão mais recente estará sempre disponível nesta página, com a data da última atualização indicada no topo. Mudanças relevantes serão comunicadas pelos canais oficiais do aplicativo.</p>
+      </section>
+
+      <section class="card" id="s11">
+        <h2><span class="num">11</span>Contato</h2>
+        <p>Se você tiver dúvidas, sugestões ou reclamações sobre esta Política de Privacidade ou sobre o tratamento dos seus dados pessoais, fale conosco:</p>
+        <div class="contact-card" style="box-shadow:none; margin-top:10px;">
+          <div class="contact-row"><span class="dot"></span> <a href="mailto:redstarsuporteof@gmail.com">redstarsuporteof@gmail.com</a></div>
+          <div class="contact-row"><span class="dot"></span> <a href="https://wa.me/5585998271418" target="_blank" rel="noopener">+55 85 99827-1418</a></div>
+          <div class="contact-row"><span class="dot"></span> <a href="https://www.instagram.com/r.e.d_s.t.a.r" target="_blank" rel="noopener">@r.e.d_s.t.a.r</a></div>
+        </div>
+      </section>
+
+    </main>
+
+    <footer>
+      <div class="brand"><span class="brand-mark">R</span> RedStar Vendedores</div>
+      RedStar 2026 — Todos os direitos reservados.
+    </footer>
+
+  </div>
+
+</body>
+</html>
