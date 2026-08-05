@@ -19,6 +19,7 @@ import '../history/history_screen.dart';
 import '../profile/profile_screen.dart';
 import 'ranking_tab.dart';
 import 'videos_tab.dart';
+import 'withdrawal_screen.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
@@ -181,6 +182,63 @@ class _DashboardContent extends ConsumerWidget {
                       fontSize: 14,
                       color: Colors.white.withValues(alpha: 0.85),
                     ),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: AppTheme.spacingLG),
+
+            // Solicitar saque
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppColors.ecoGreen.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: AppColors.ecoGreen.withValues(alpha: 0.25),
+                ),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.payments_outlined, color: AppColors.ecoGreen),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Comissão disponível',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurface
+                                .withValues(alpha: 0.6),
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'R\$ ${(summary?.approvedCommission ?? 0).toStringAsFixed(2)}',
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.ecoGreen,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  FilledButton.icon(
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => const WithdrawalScreen(),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.arrow_forward_rounded, size: 18),
+                    label: const Text('Solicitar'),
                   ),
                 ],
               ),

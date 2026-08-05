@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/constants/app_colors.dart';
+import '../../providers/withdrawal_provider.dart';
 import '../admin/admin_affiliates_screen.dart';
 import '../admin/admin_dashboard_screen.dart';
 import '../admin/admin_products_screen.dart';
@@ -8,15 +10,16 @@ import '../admin/admin_settings_screen.dart';
 import '../admin/admin_ranking_screen.dart';
 import '../admin/admin_sync_screen.dart';
 import '../admin/admin_videos_screen.dart';
+import '../admin/admin_withdrawals_screen.dart';
 
-class AdminShellScreen extends StatefulWidget {
+class AdminShellScreen extends ConsumerStatefulWidget {
   const AdminShellScreen({super.key});
 
   @override
-  State<AdminShellScreen> createState() => _AdminShellScreenState();
+  ConsumerState<AdminShellScreen> createState() => _AdminShellScreenState();
 }
 
-class _AdminShellScreenState extends State<AdminShellScreen> {
+class _AdminShellScreenState extends ConsumerState<AdminShellScreen> {
   int _selectedIndex = 0;
 
   static const _titles = [
@@ -25,6 +28,7 @@ class _AdminShellScreenState extends State<AdminShellScreen> {
     'Produtos',
     'Vídeos',
     'Ranking',
+    'Saques',
     'Sincronização RedStar',
     'Configurações',
   ];
@@ -42,8 +46,10 @@ class _AdminShellScreenState extends State<AdminShellScreen> {
       case 4:
         return const AdminRankingScreen();
       case 5:
-        return const AdminSyncScreen();
+        return const AdminWithdrawalsScreen();
       case 6:
+        return const AdminSyncScreen();
+      case 7:
         return const AdminSettingsScreen();
       default:
         return const AdminDashboardScreen();
@@ -54,6 +60,8 @@ class _AdminShellScreenState extends State<AdminShellScreen> {
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
     final isWide = width >= 800;
+    final pendingCount =
+        ref.watch(pendingWithdrawalCountProvider).valueOrNull ?? 0;
 
     return Scaffold(
       appBar: AppBar(
@@ -105,17 +113,24 @@ class _AdminShellScreenState extends State<AdminShellScreen> {
                       onTap: () => setState(() { _selectedIndex = 4; Navigator.pop(context); }),
                     ),
                     _DrawerItem(
+                      icon: Icons.payments_rounded,
+                      label: 'Saques',
+                      selected: _selectedIndex == 5,
+                      badgeCount: pendingCount,
+                      onTap: () => setState(() { _selectedIndex = 5; Navigator.pop(context); }),
+                    ),
+                    _DrawerItem(
                       icon: Icons.sync_rounded,
                       label: 'Sincronização RedStar',
-                      selected: _selectedIndex == 5,
-                      onTap: () => setState(() { _selectedIndex = 5; Navigator.pop(context); }),
+                      selected: _selectedIndex == 6,
+                      onTap: () => setState(() { _selectedIndex = 6; Navigator.pop(context); }),
                     ),
                     const Divider(),
                     _DrawerItem(
                       icon: Icons.settings_rounded,
                       label: 'Configurações',
-                      selected: _selectedIndex == 6,
-                      onTap: () => setState(() { _selectedIndex = 6; Navigator.pop(context); }),
+                      selected: _selectedIndex == 7,
+                      onTap: () => setState(() { _selectedIndex = 7; Navigator.pop(context); }),
                     ),
                   ],
                 ),
@@ -142,32 +157,36 @@ class _AdminShellScreenState extends State<AdminShellScreen> {
                       child: Icon(Icons.bolt_rounded, size: 32, color: AppColors.ecoGreen),
                     ),
                     labelType: NavigationRailLabelType.all,
-                    destinations: const [
-                      NavigationRailDestination(
+                    destinations: [
+                      const NavigationRailDestination(
                         icon: Icon(Icons.dashboard_rounded),
                         label: Text('Dashboard'),
                       ),
-                      NavigationRailDestination(
+                      const NavigationRailDestination(
                         icon: Icon(Icons.people_rounded),
                         label: Text('Afiliados'),
                       ),
-                      NavigationRailDestination(
+                      const NavigationRailDestination(
                         icon: Icon(Icons.inventory_2_rounded),
                         label: Text('Produtos'),
                       ),
-                      NavigationRailDestination(
+                      const NavigationRailDestination(
                         icon: Icon(Icons.video_library_rounded),
                         label: Text('Vídeos'),
                       ),
-                      NavigationRailDestination(
+                      const NavigationRailDestination(
                         icon: Icon(Icons.leaderboard_rounded),
                         label: Text('Ranking'),
                       ),
                       NavigationRailDestination(
+                        icon: _iconWithBadge(Icons.payments_rounded, pendingCount),
+                        label: const Text('Saques'),
+                      ),
+                      const NavigationRailDestination(
                         icon: Icon(Icons.sync_rounded),
                         label: Text('Sync RedStar'),
                       ),
-                      NavigationRailDestination(
+                      const NavigationRailDestination(
                         icon: Icon(Icons.settings_rounded),
                         label: Text('Config'),
                       ),
@@ -182,6 +201,15 @@ class _AdminShellScreenState extends State<AdminShellScreen> {
       ),
     );
   }
+
+  Widget _iconWithBadge(IconData icon, int count) {
+    return Badge.count(
+      count: count,
+      isLabelVisible: count > 0,
+      backgroundColor: AppColors.error,
+      child: Icon(icon),
+    );
+  }
 }
 
 class _DrawerItem extends StatelessWidget {
@@ -190,12 +218,14 @@ class _DrawerItem extends StatelessWidget {
     required this.label,
     required this.selected,
     required this.onTap,
+    this.badgeCount,
   });
 
   final IconData icon;
   final String label;
   final bool selected;
   final VoidCallback onTap;
+  final int? badgeCount;
 
   @override
   Widget build(BuildContext context) {
@@ -211,6 +241,12 @@ class _DrawerItem extends StatelessWidget {
           color: selected ? AppColors.ecoGreen : null,
         ),
       ),
+      trailing: badgeCount != null && badgeCount! > 0
+          ? Badge.count(
+              count: badgeCount!,
+              backgroundColor: AppColors.error,
+            )
+          : null,
       selected: selected,
       selectedTileColor: AppColors.ecoGreen.withValues(alpha: 0.08),
       onTap: onTap,
