@@ -44,11 +44,22 @@ create policy "withdrawal_requests_admin_all"
 -- saque duplicado antes do admin confirmar o primeiro)
 create or replace function public.get_affiliate_balance(p_affiliate_id uuid)
 returns numeric(12,2)
-language sql
+language plpgsql
 security definer
 set search_path = public
 stable
 as $$
+declare
+  v_balance numeric(12,2);
+begin
+  -- Só o próprio afiliado (ou admin) pode consultar o saldo
+  if not public.is_admin() and not exists (
+    select 1 from public.affiliates
+    where id = p_affiliate_id and auth_user_id = auth.uid()
+  ) then
+    raise exception 'Acesso negado';
+  end if;
+
   select
     coalesce((
       select sum(commission_amount) from public.sales
@@ -57,10 +68,18 @@ as $$
     - coalesce((
       select sum(valor) from public.withdrawal_requests
       where affiliate_id = p_affiliate_id and status in ('pago', 'pendente')
-    ), 0);
+    ), 0)
+  into v_balance;
+
+  return v_balance;
+end;
 $$;
 
-grant execute on function public.get_affiliate_balance(uuid) to authenticated;
+-- Revoga EXECUTE de public/anon (as default privileges do Supabase concedem
+-- diretamente a anon/authenticated/service_role, então é preciso revogar
+-- explicitamente) e libera apenas para authenticated/service_role.
+revoke execute on function public.get_affiliate_balance(uuid) from public, anon;
+grant execute on function public.get_affiliate_balance(uuid) to authenticated, service_role;
 
 -- Cria a solicitação validando TODAS as regras no servidor (nunca confiar
 -- só na validação do app — o app só existe pra dar uma boa UX, a regra de
@@ -127,7 +146,8 @@ begin
 end;
 $$;
 
-grant execute on function public.request_withdrawal(numeric) to authenticated;
+grant execute on function public.request_withdrawal(numeric) to authenticated, service_role;
+revoke execute on function public.request_withdrawal(numeric) from public, anon;
 
 -- Admin confirma que o PIX foi pago manualmente por fora do app
 create or replace function public.confirm_withdrawal_payment(p_request_id uuid)
@@ -156,4 +176,5 @@ begin
 end;
 $$;
 
-grant execute on function public.confirm_withdrawal_payment(uuid) to authenticated;
+grant execute on function public.confirm_withdrawal_payment(uuid) to authenticated, service_role;
+revoke execute on function public.confirm_withdrawal_payment(uuid) from public, anon;
