@@ -73,8 +73,35 @@ serve(async (req) => {
 
   const startMs = Date.now();
 
+  const authHeader = req.headers.get("Authorization");
+  if (!authHeader) {
+    return jsonResponse({ success: false, error: "Unauthorized" }, 401);
+  }
+
   try {
     const config = loadConfig();
+
+    // Verifica que quem chamou é um admin autenticado antes de fazer
+    // qualquer trabalho. Sem isso, qualquer pessoa com a anon key pública
+    // (visível em qualquer inspeção do app) conseguia disparar essa sync.
+    const authClient = createClient(config.supabase.url, Deno.env.get("SUPABASE_ANON_KEY") ?? "", {
+      global: { headers: { Authorization: authHeader } },
+    });
+
+    const { data: { user }, error: authError } = await authClient.auth.getUser();
+    if (authError || !user) {
+      return jsonResponse({ success: false, error: "Unauthorized" }, 401);
+    }
+
+    const { data: profile } = await authClient
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    if (profile?.role !== "admin") {
+      return jsonResponse({ success: false, error: "Forbidden: admin access required" }, 403);
+    }
 
     if (!config.cj) {
       return jsonResponse(

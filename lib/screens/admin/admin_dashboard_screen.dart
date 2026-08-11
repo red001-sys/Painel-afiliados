@@ -11,6 +11,7 @@ class AdminDashboardScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colorScheme = Theme.of(context).colorScheme;
     final dataAsync = ref.watch(adminDashboardProvider);
 
     return RefreshIndicator(
@@ -42,9 +43,9 @@ class AdminDashboardScreen extends ConsumerWidget {
                 Expanded(
                     child: _MetricCard(
                   icon: Icons.people_rounded,
-                  label: 'Total Afiliados',
+                  label: 'Total Vendedores',
                   value: '${data['affiliatesCount']}',
-                  color: AppColors.ecoGreen,
+                  color: colorScheme.primary,
                 )),
                 const SizedBox(width: 12),
                 Expanded(
@@ -82,7 +83,7 @@ class AdminDashboardScreen extends ConsumerWidget {
               label: 'Comissão Total (Aprovada)',
               value:
                   'R\$ ${(data['totalCommission'] as num?)?.toDouble().toStringAsFixed(2) ?? '0.00'}',
-              color: AppColors.ecoGreen,
+              color: colorScheme.primary,
               wide: true,
             ),
             const SizedBox(height: 20),
@@ -171,8 +172,8 @@ class _LastSyncCard extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  const Icon(Icons.sync_rounded,
-                      size: 20, color: AppColors.ecoGreen),
+                  Icon(Icons.sync_rounded,
+                      size: 20, color: colorScheme.primary),
                   const SizedBox(width: 8),
                   Text(
                     'Última Sincronização',
@@ -231,8 +232,8 @@ class _LastSyncCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                const Icon(Icons.sync_rounded,
-                    size: 20, color: AppColors.ecoGreen),
+                Icon(Icons.sync_rounded,
+                    size: 20, color: colorScheme.primary),
                 const SizedBox(width: 8),
                 Text(
                   'Última Sincronização',

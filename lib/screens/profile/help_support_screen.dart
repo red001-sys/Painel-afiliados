@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../core/constants/app_colors.dart';
 import '../../core/theme/app_theme.dart';
 
 class HelpSupportScreen extends StatelessWidget {
@@ -46,7 +45,7 @@ class HelpSupportScreen extends StatelessWidget {
           const SizedBox(height: 8),
           Card(
             child: ListTile(
-              leading: const Icon(Icons.phone_rounded, color: Color(0xFF2196F3)),
+              leading: Icon(Icons.phone_rounded, color: colorScheme.primary),
               title: const Text('Telefone'),
               subtitle: const Text(_supportPhone),
               trailing: const Icon(Icons.chevron_right_rounded),
@@ -56,7 +55,7 @@ class HelpSupportScreen extends StatelessWidget {
           const SizedBox(height: 8),
           Card(
             child: ListTile(
-              leading: const Icon(Icons.shield_outlined, color: Color(0xFF2196F3)),
+              leading: Icon(Icons.shield_outlined, color: colorScheme.primary),
               title: const Text('Política de Privacidade'),
               subtitle: const Text('Saiba como tratamos seus dados'),
               trailing: const Icon(Icons.chevron_right_rounded),
@@ -76,7 +75,7 @@ class HelpSupportScreen extends StatelessWidget {
           const _FaqTile(
             question: 'Quando recebo minha comissão?',
             answer:
-                'As comissões são apuradas conforme os relatórios de vendas sincronizados com a RedStar e pagas via a chave PIX cadastrada em "Dados Bancários".',
+                'As comissões são apuradas conforme os relatórios de vendas sincronizados com a Nex e pagas via a chave PIX cadastrada em "Dados Bancários".',
           ),
           const _FaqTile(
             question: 'Como recebo novos links de produtos?',

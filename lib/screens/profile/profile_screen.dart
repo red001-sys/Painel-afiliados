@@ -191,7 +191,7 @@ class ProfileScreen extends ConsumerWidget {
           const SizedBox(height: 24),
           // Footer
           Text(
-            '© RedStar 2026',
+            '© Nex 2026',
             style: TextStyle(
               fontSize: 12,
               color: Colors.grey[600],

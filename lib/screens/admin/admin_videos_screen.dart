@@ -7,8 +7,10 @@ import '../../core/constants/app_colors.dart';
 import '../../core/theme/app_theme.dart';
 import '../../models/video.dart';
 import '../../providers/video_provider.dart';
+import '../../services/video_thumbnail_generator.dart';
 import '../../widgets/copyright_footer.dart';
 import '../../widgets/video_preview.dart';
+import '../../widgets/video_thumbnail.dart';
 
 class AdminVideosScreen extends ConsumerStatefulWidget {
   const AdminVideosScreen({super.key});
@@ -30,7 +32,7 @@ class _AdminVideosScreenState extends ConsumerState<AdminVideosScreen> {
             children: [
               Expanded(
                 child: Text(
-                  'Vídeos disponibilizados para os afiliados baixarem',
+                  'Vídeos disponibilizados para os vendedores baixarem',
                   style: TextStyle(
                     fontSize: 13,
                     color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
@@ -157,86 +159,72 @@ class _VideoTile extends StatelessWidget {
 
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
-      child: Column(
-        children: [
-          ListTile(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-            leading: InkWell(
-              onTap: () => VideoPreview.show(context, video.videoUrl, video.titulo),
-              borderRadius: BorderRadius.circular(8),
-              child: SizedBox(
-                width: 48,
-                height: 48,
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: video.thumbnailUrl != null
-                          ? Image.network(
-                              video.thumbnailUrl!,
-                              fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) => Container(
-                                color: AppColors.ecoGreen.withValues(alpha: 0.1),
-                              ),
-                            )
-                          : Container(color: AppColors.ecoGreen.withValues(alpha: 0.1)),
+      child: InkWell(
+        onTap: () => VideoPreview.show(context, video.videoUrl, video.titulo),
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(10),
+          child: Row(
+            children: [
+              Stack(
+                children: [
+                  VideoThumbnail(video: video, size: 72),
+                  const Positioned.fill(
+                    child: Center(
+                      child: Icon(
+                        Icons.play_circle_fill_rounded,
+                        color: Colors.white,
+                        size: 28,
+                        shadows: [Shadow(color: Colors.black45, blurRadius: 6)],
+                      ),
                     ),
-                    const Center(
-                      child: Icon(Icons.play_circle_fill_rounded,
-                          color: AppColors.ecoGreenDark, size: 22),
+                  ),
+                ],
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      video.titulo,
+                      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    if (video.descricao != null && video.descricao!.isNotEmpty)
+                      Text(
+                        video.descricao!,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: colorScheme.onSurface.withValues(alpha: 0.4),
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    const SizedBox(height: 4),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                      decoration: BoxDecoration(
+                        color: (video.ativo ? colorScheme.primary : Colors.orange)
+                            .withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        video.ativo ? 'Ativo' : 'Inativo',
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                          color: video.ativo ? colorScheme.primary : Colors.orange,
+                        ),
+                      ),
                     ),
                   ],
                 ),
               ),
-            ),
-            title: Text(video.titulo, style: const TextStyle(fontWeight: FontWeight.w600)),
-            subtitle: video.descricao != null && video.descricao!.isNotEmpty
-                ? Text(
-                    video.descricao!,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontSize: 12, color: colorScheme.onSurface.withValues(alpha: 0.4)),
-                  )
-                : null,
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: (video.ativo ? AppColors.ecoGreen : Colors.orange).withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    video.ativo ? 'Ativo' : 'Inativo',
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                      color: video.ativo ? AppColors.ecoGreen : Colors.orange,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 4),
-                PopupMenuButton<String>(
-                  itemBuilder: (context) => [
-                    const PopupMenuItem(value: 'edit', child: Text('Editar')),
-                    const PopupMenuItem(value: 'delete', child: Text('Excluir')),
-                  ],
-                  onSelected: (v) {
-                    if (v == 'edit') onEdit();
-                    if (v == 'delete') onDelete();
-                  },
-                ),
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-            child: SizedBox(
-              width: double.infinity,
-              height: 36,
-              child: OutlinedButton.icon(
+              const SizedBox(width: 8),
+              IconButton.filledTonal(
+                tooltip: 'Baixar',
                 onPressed: () async {
                   final launched = await launchUrl(
                     Uri.parse(_downloadUrl(video.videoUrl)),
@@ -248,12 +236,21 @@ class _VideoTile extends StatelessWidget {
                     );
                   }
                 },
-                icon: const Icon(Icons.download_rounded, size: 16),
-                label: const Text('Baixar', style: TextStyle(fontSize: 13)),
+                icon: const Icon(Icons.download_rounded, size: 20),
               ),
-            ),
+              PopupMenuButton<String>(
+                itemBuilder: (context) => [
+                  const PopupMenuItem(value: 'edit', child: Text('Editar')),
+                  const PopupMenuItem(value: 'delete', child: Text('Excluir')),
+                ],
+                onSelected: (v) {
+                  if (v == 'edit') onEdit();
+                  if (v == 'delete') onDelete();
+                },
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -301,6 +298,7 @@ class _VideoDialogBodyState extends State<_VideoDialogBody> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Padding(
       padding: EdgeInsets.fromLTRB(24, 24, 24, MediaQuery.of(context).viewInsets.bottom + 24),
       child: SingleChildScrollView(
@@ -378,7 +376,7 @@ class _VideoDialogBodyState extends State<_VideoDialogBody> {
               title: const Text('Ativo'),
               value: _ativo,
               onChanged: (v) => setState(() => _ativo = v),
-              activeColor: AppColors.ecoGreen,
+              activeColor: colorScheme.primary,
             ),
             SizedBox(height: AppTheme.spacingXL),
             SizedBox(
@@ -479,13 +477,35 @@ class _VideoDialogBodyState extends State<_VideoDialogBody> {
     setState(() => _isUploading = true);
 
     try {
+      // Gera a capa automaticamente a partir do próprio vídeo, uma única vez,
+      // no momento do upload. Se a geração falhar por qualquer motivo, o
+      // upload do vídeo continua normalmente — o botão manual de capa segue
+      // disponível como alternativa.
+      final thumbBytes = await generateVideoThumbnail(file.bytes!);
+
       final url = await widget.ref.read(videoRepositoryProvider).uploadVideo(
             file.bytes!,
             file.name,
           );
+
+      String? thumbUrl;
+      if (thumbBytes != null && _thumbCtrl.text.trim().isEmpty) {
+        try {
+          thumbUrl = await widget.ref.read(videoRepositoryProvider).uploadThumbnail(
+                thumbBytes,
+                'auto_${file.name}.jpg',
+                contentType: 'image/jpeg',
+              );
+        } catch (_) {
+          thumbUrl = null;
+        }
+      }
+
+      if (!mounted) return;
       setState(() {
         _urlCtrl.text = url;
         _uploadedFileName = file.name;
+        if (thumbUrl != null) _thumbCtrl.text = thumbUrl;
       });
     } catch (e) {
       if (mounted) {

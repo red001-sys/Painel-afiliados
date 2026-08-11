@@ -17,7 +17,6 @@ import '../../widgets/skeleton_loader.dart';
 import '../../widgets/state_widgets.dart';
 import '../history/history_screen.dart';
 import '../profile/profile_screen.dart';
-import 'ranking_tab.dart';
 import 'videos_tab.dart';
 import 'withdrawal_screen.dart';
 
@@ -31,7 +30,7 @@ class DashboardScreen extends ConsumerStatefulWidget {
 class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   int _currentIndex = 0;
 
-  static const _titles = ['Dashboard', 'Meus Links', 'Vídeos', 'Ranking', 'Histórico', 'Perfil'];
+  static const _titles = ['Dashboard', 'Meus Links', 'Vídeos', 'Histórico', 'Perfil'];
 
   @override
   Widget build(BuildContext context) {
@@ -56,7 +55,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           _DashboardTab(),
           _MyLinksTab(),
           VideosTab(),
-          RankingTab(),
           HistoryScreen(),
           ProfileScreen(),
         ],
@@ -81,11 +79,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             icon: Icon(Icons.video_library_outlined),
             selectedIcon: Icon(Icons.video_library_rounded),
             label: 'Vídeos',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.leaderboard_outlined),
-            selectedIcon: Icon(Icons.leaderboard_rounded),
-            label: 'Ranking',
           ),
           NavigationDestination(
             icon: Icon(Icons.history_outlined),
@@ -137,6 +130,7 @@ class _DashboardContent extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colorScheme = Theme.of(context).colorScheme;
     final summary = ref.watch(dashboardSummaryProvider);
     final weeklyData = ref.watch(weeklyChartDataProvider);
     final monthlyData = ref.watch(monthlyChartDataProvider);
@@ -157,10 +151,10 @@ class _DashboardContent extends ConsumerWidget {
               width: double.infinity,
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                gradient: const LinearGradient(
+                gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
-                  colors: [AppColors.ecoGreen, AppColors.ecoGreenDark],
+                  colors: [colorScheme.primary, colorScheme.onPrimaryContainer],
                 ),
                 borderRadius: BorderRadius.circular(16),
               ),
@@ -193,15 +187,15 @@ class _DashboardContent extends ConsumerWidget {
               width: double.infinity,
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: AppColors.ecoGreen.withValues(alpha: 0.08),
+                color: colorScheme.primary.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: AppColors.ecoGreen.withValues(alpha: 0.25),
+                  color: colorScheme.primary.withValues(alpha: 0.25),
                 ),
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.payments_outlined, color: AppColors.ecoGreen),
+                  Icon(Icons.payments_outlined, color: colorScheme.primary),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
@@ -220,10 +214,10 @@ class _DashboardContent extends ConsumerWidget {
                         const SizedBox(height: 2),
                         Text(
                           'R\$ ${(summary?.approvedCommission ?? 0).toStringAsFixed(2)}',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w700,
-                            color: AppColors.ecoGreen,
+                            color: colorScheme.primary,
                           ),
                         ),
                       ],
@@ -262,7 +256,7 @@ class _DashboardContent extends ConsumerWidget {
                     title: 'Comissão Total',
                     value: 'R\$ ${(summary?.totalCommission ?? 0).toStringAsFixed(2)}',
                     icon: Icons.attach_money_rounded,
-                    color: AppColors.ecoGreen,
+                    color: colorScheme.primary,
                     delay: Duration.zero,
                   ),
                 ),
@@ -334,14 +328,14 @@ class _MyLinksTab extends ConsumerWidget {
     return affiliateAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (e, _) => ErrorState(
-        message: 'Erro ao carregar afiliado',
+        message: 'Erro ao carregar vendedor',
         onRetry: () => ref.invalidate(currentAffiliateProvider),
       ),
       data: (affiliate) {
         if (affiliate == null) {
           return const EmptyState(
             icon: Icons.link_off_rounded,
-            title: 'Afiliado não encontrado',
+            title: 'Vendedor não encontrado',
           );
         }
 
@@ -408,8 +402,8 @@ class _AffiliateLinkCard extends StatelessWidget {
                       errorBuilder: (_, __, ___) => Container(
                         width: 56,
                         height: 56,
-                        color: AppColors.ecoGreen.withValues(alpha: 0.1),
-                        child: const Icon(Icons.inventory_2_rounded, size: 28, color: AppColors.ecoGreen),
+                        color: colorScheme.primary.withValues(alpha: 0.1),
+                        child: Icon(Icons.inventory_2_rounded, size: 28, color: colorScheme.primary),
                       ),
                     ),
                   )
@@ -418,10 +412,10 @@ class _AffiliateLinkCard extends StatelessWidget {
                     width: 56,
                     height: 56,
                     decoration: BoxDecoration(
-                      color: AppColors.ecoGreen.withValues(alpha: 0.1),
+                      color: colorScheme.primary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: const Icon(Icons.inventory_2_rounded, size: 28, color: AppColors.ecoGreen),
+                    child: Icon(Icons.inventory_2_rounded, size: 28, color: colorScheme.primary),
                   ),
                 const SizedBox(width: 12),
                 Expanded(

@@ -45,9 +45,9 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
       }
       if (next.success) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Senha atualizada com sucesso!'),
-            backgroundColor: AppColors.ecoGreen,
+          SnackBar(
+            content: const Text('Senha atualizada com sucesso!'),
+            backgroundColor: colorScheme.primary,
           ),
         );
         Future.delayed(const Duration(milliseconds: 1500), () {
@@ -80,13 +80,13 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                     width: 72,
                     height: 72,
                     decoration: BoxDecoration(
-                      color: AppColors.ecoGreen.withValues(alpha: 0.1),
+                      color: colorScheme.primary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(20),
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.password_rounded,
                       size: 40,
-                      color: AppColors.ecoGreen,
+                      color: colorScheme.primary,
                     ),
                   ),
                 ),

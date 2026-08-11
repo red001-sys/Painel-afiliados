@@ -301,10 +301,10 @@ class _ProductTile extends StatelessWidget {
                     width: 48,
                     height: 48,
                     decoration: BoxDecoration(
-                      color: AppColors.ecoGreen.withValues(alpha: 0.1),
+                      color: colorScheme.primary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: const Icon(Icons.inventory_2_rounded, color: AppColors.ecoGreen),
+                    child: Icon(Icons.inventory_2_rounded, color: colorScheme.primary),
                   ),
                 ),
               )
@@ -312,10 +312,10 @@ class _ProductTile extends StatelessWidget {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: AppColors.ecoGreen.withValues(alpha: 0.1),
+                  color: colorScheme.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Icon(Icons.inventory_2_rounded, color: AppColors.ecoGreen),
+                child: Icon(Icons.inventory_2_rounded, color: colorScheme.primary),
               ),
         title: Text(product.nome, style: const TextStyle(fontWeight: FontWeight.w600)),
         subtitle: Column(
@@ -331,10 +331,10 @@ class _ProductTile extends StatelessWidget {
                   const SizedBox(width: 8),
                   Text(
                     '${_priceSymbol(product)} ${product.preco!.toStringAsFixed(2)}',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.ecoGreenDark,
+                      color: colorScheme.onPrimaryContainer,
                     ),
                   ),
                 ],
@@ -379,7 +379,7 @@ class _ProductTile extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                   decoration: BoxDecoration(
-                    color: (product.ativo ? AppColors.ecoGreen : Colors.orange).withValues(alpha: 0.1),
+                    color: (product.ativo ? colorScheme.primary : Colors.orange).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
@@ -387,7 +387,7 @@ class _ProductTile extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
-                      color: product.ativo ? AppColors.ecoGreen : Colors.orange,
+                      color: product.ativo ? colorScheme.primary : Colors.orange,
                     ),
                   ),
                 ),
@@ -597,6 +597,7 @@ class _SyncResultDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final imported = (result['imported'] as num?)?.toInt() ?? 0;
     final updated = (result['updated'] as num?)?.toInt() ?? 0;
     final skipped = (result['skippedNonUsd'] as num?)?.toInt() ?? 0;
@@ -615,7 +616,7 @@ class _SyncResultDialog extends StatelessWidget {
           _ResultRow(
             label: 'Novos importados',
             value: '$imported',
-            color: AppColors.ecoGreen,
+            color: colorScheme.primary,
           ),
           _ResultRow(
             label: 'Atualizados',
@@ -630,7 +631,7 @@ class _SyncResultDialog extends StatelessWidget {
           _ResultRow(
             label: 'Falhas',
             value: '$failed',
-            color: failed > 0 ? AppColors.error : AppColors.ecoGreen,
+            color: failed > 0 ? AppColors.error : colorScheme.primary,
           ),
           const SizedBox(height: 8),
           Text(
@@ -703,16 +704,17 @@ class _FilterChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return ChoiceChip(
       label: Text(label),
       selected: selected,
       onSelected: (_) => onSelected(),
       showCheckmark: false,
-      selectedColor: AppColors.ecoGreen.withValues(alpha: 0.15),
+      selectedColor: colorScheme.primary.withValues(alpha: 0.15),
       labelStyle: TextStyle(
         fontSize: 13,
         fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-        color: selected ? AppColors.ecoGreenDark : null,
+        color: selected ? colorScheme.onPrimaryContainer : null,
       ),
     );
   }

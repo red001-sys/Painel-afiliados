@@ -76,7 +76,7 @@ class FirstAccessNotifier extends StateNotifier<FirstAccessState> {
       } catch (e) {
         state = const FirstAccessState(
           isLoading: false,
-          error: 'Erro ao vincular afiliado. Entre em contato com o administrador.',
+          error: 'Erro ao vincular vendedor. Entre em contato com o administrador.',
         );
         return;
       }

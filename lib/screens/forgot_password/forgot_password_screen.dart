@@ -41,9 +41,9 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
       }
       if (next.success) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Enviamos um link de redefinição para seu e-mail.'),
-            backgroundColor: AppColors.ecoGreen,
+          SnackBar(
+            content: const Text('Enviamos um link de redefinição para seu e-mail.'),
+            backgroundColor: colorScheme.primary,
           ),
         );
       }
@@ -69,13 +69,13 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                     width: 72,
                     height: 72,
                     decoration: BoxDecoration(
-                      color: AppColors.ecoGreen.withValues(alpha: 0.1),
+                      color: colorScheme.primary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(20),
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.lock_reset_rounded,
                       size: 40,
-                      color: AppColors.ecoGreen,
+                      color: colorScheme.primary,
                     ),
                   ),
                 ),
@@ -146,7 +146,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 13,
-                      color: AppColors.ecoGreen,
+                      color: colorScheme.primary,
                     ),
                   ),
               ],

@@ -1,14 +1,11 @@
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { CJClient } from "./cj_client.ts";
-import { mapCJRecordToSale } from "./mapper.ts";
-import {
-  createSyncLog,
-  findAffiliateIdBySid,
-  insertSales,
-  transactionExists,
-  updateSyncLog,
-} from "./database.ts";
+import { loadConfig } from "./config.ts";
+import { createSyncLogger } from "./logger.ts";
+import { runSync } from "./sync.ts";
+import { getSyncState, upsertSyncState } from "./database.ts";
+import { CJProvider } from "./providers/cj_provider.ts";
+import { SyncResult } from "./types.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -16,145 +13,186 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
-serve(async (req: Request) => {
+const DEFAULT_LOOKBACK_DAYS = 90;
+const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
+
+function isValidDate(dateStr: string): boolean {
+  if (!DATE_REGEX.test(dateStr)) return false;
+  const d = new Date(dateStr);
+  return !isNaN(d.getTime());
+}
+
+serve(async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
 
-  const supabaseUrl = Deno.env.get("SUPABASE_URL");
-  const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-  const cjToken = Deno.env.get("CJ_PERSONAL_ACCESS_TOKEN");
-  const cjWebsiteId = Deno.env.get("CJ_WEBSITE_ID");
-
-  if (!supabaseUrl || !supabaseKey || !cjToken || !cjWebsiteId) {
-    return new Response(
-      JSON.stringify({ success: false, error: "Missing required environment variables" }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-    );
-  }
-
   const authHeader = req.headers.get("Authorization");
   if (!authHeader) {
-    return new Response(
-      JSON.stringify({ success: false, error: "Unauthorized" }),
-      { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+    return jsonResponse({ success: false, error: "Unauthorized" }, 401);
+  }
+
+  const supabaseUrl = Deno.env.get("SUPABASE_URL");
+  const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY");
+  if (!supabaseUrl || !supabaseAnonKey) {
+    return jsonResponse(
+      { success: false, error: "Supabase env not configured." },
+      500,
     );
   }
 
-  const supabase = createClient(supabaseUrl, supabaseKey);
-
-  const logId = await createSyncLog(supabase, {
-    started_at: new Date().toISOString(),
-    finished_at: null,
-    transactions_read: 0,
-    transactions_imported: 0,
-    transactions_skipped: 0,
-    unknown_sid: 0,
-    status: "running",
-    error_message: null,
+  const supabaseAuth = createClient(supabaseUrl, supabaseAnonKey, {
+    global: { headers: { Authorization: authHeader } },
   });
 
+  const {
+    data: { user },
+    error: authError,
+  } = await supabaseAuth.auth.getUser();
+
+  if (authError || !user) {
+    return jsonResponse({ success: false, error: "Unauthorized" }, 401);
+  }
+
+  const { data: profile } = await supabaseAuth
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  if (profile?.role !== "admin") {
+    return jsonResponse(
+      { success: false, error: "Forbidden: admin access required" },
+      403,
+    );
+  }
+
+  let config;
   try {
-    const cj = new CJClient(cjToken, cjWebsiteId);
+    config = loadConfig();
+  } catch (error) {
+    return jsonResponse(
+      { success: false, error: (error as Error).message },
+      500,
+    );
+  }
 
-    const { startDate, endDate } = getDateRange(req);
+  if (!config.cj) {
+    return jsonResponse(
+      {
+        success: false,
+        error:
+          "CJ secrets not configured. Set CJ_PERSONAL_ACCESS_TOKEN and CJ_WEBSITE_ID.",
+      },
+      500,
+    );
+  }
 
-    const records = await cj.fetchAllCommissions(startDate, endDate);
+  const supabase = createClient(
+    config.supabase.url,
+    config.supabase.serviceRoleKey,
+  );
+  const provider = new CJProvider(config.cj);
 
-    let imported = 0;
-    let skipped = 0;
-    let unknownSid = 0;
+  let logger;
+  try {
+    logger = await createSyncLogger(supabase);
+  } catch (error) {
+    return jsonResponse(
+      { success: false, error: "Failed to create sync log: " + (error as Error).message },
+      500,
+    );
+  }
 
-    for (const record of records) {
-      const sid = String(record.publisherId);
+  try {
+    const url = new URL(req.url);
+    const overrideStart = url.searchParams.get("start_date");
+    const overrideEnd = url.searchParams.get("end_date");
 
-      const affiliateId = await findAffiliateIdBySid(supabase, sid);
-
-      if (!affiliateId) {
-        unknownSid++;
-        console.log(`SID not found: ${sid}, transaction: ${record.transactionId}`);
-        continue;
-      }
-
-      const exists = await transactionExists(
-        supabase,
-        String(record.transactionId),
+    if (overrideStart && !isValidDate(overrideStart)) {
+      return jsonResponse(
+        { success: false, error: "Invalid start_date format. Use YYYY-MM-DD." },
+        400,
       );
-
-      if (exists) {
-        skipped++;
-        continue;
-      }
-
-      const sale = mapCJRecordToSale(record, affiliateId);
-
-      await insertSales(supabase, [sale]);
-      imported++;
+    }
+    if (overrideEnd && !isValidDate(overrideEnd)) {
+      return jsonResponse(
+        { success: false, error: "Invalid end_date format. Use YYYY-MM-DD." },
+        400,
+      );
     }
 
-    await updateSyncLog(supabase, logId, {
-      finished_at: new Date().toISOString(),
-      transactions_read: records.length,
-      transactions_imported: imported,
-      transactions_skipped: skipped,
-      unknown_sid: unknownSid,
-      status: "success",
-    });
+    const syncState = await getSyncState(supabase, provider.name);
 
-    return new Response(
-      JSON.stringify({
-        success: true,
-        transactionsRead: records.length,
-        transactionsImported: imported,
-        transactionsSkipped: skipped,
-        unknownSid: unknownSid,
-      }),
-      {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      },
+    let startDate: string;
+    const endDate = overrideEnd || new Date().toISOString().split("T")[0];
+
+    if (overrideStart) {
+      startDate = overrideStart;
+    } else if (syncState?.last_transaction_date) {
+      const lastDate = new Date(syncState.last_transaction_date);
+      lastDate.setDate(lastDate.getDate() - 1);
+      startDate = lastDate.toISOString().split("T")[0];
+    } else {
+      const lookback = new Date();
+      lookback.setDate(lookback.getDate() - DEFAULT_LOOKBACK_DAYS);
+      startDate = lookback.toISOString().split("T")[0];
+    }
+
+    const result = await runSync(
+      supabase,
+      provider,
+      startDate,
+      endDate,
+      logger,
     );
+
+    if (result.read > 0) {
+      try {
+        await upsertSyncState(supabase, provider.name, endDate);
+      } catch (_stateError) {
+        // Log but don't fail the sync
+      }
+    }
+
+    return jsonResponse(result, 200);
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Unknown error";
 
-    await updateSyncLog(supabase, logId, {
-      finished_at: new Date().toISOString(),
-      status: "error",
-      error_message: message,
+    await logger.finish({
+      read: 0,
+      imported: 0,
+      updated: 0,
+      duplicates: 0,
+      unknownSid: 0,
+      failed: 1,
+      durationMs: 0,
+      error: message,
     });
 
-    return new Response(
-      JSON.stringify({ success: false, error: message }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      },
-    );
+    const result: SyncResult = {
+      success: false,
+      read: 0,
+      imported: 0,
+      updated: 0,
+      duplicates: 0,
+      unknownSid: 0,
+      failed: 1,
+      durationMs: 0,
+      error: message,
+    };
+
+    return jsonResponse(result, 500);
   }
 });
 
-function getDateRange(req: Request): {
-  startDate: string;
-  endDate: string;
-} {
-  const url = new URL(req.url);
-  const start = url.searchParams.get("start_date");
-  const end = url.searchParams.get("end_date");
-
-  if (start && end) {
-    return { startDate: start, endDate: end };
-  }
-
-  const now = new Date();
-  const thirtyDaysAgo = new Date(now);
-  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
-  return {
-    startDate: formatDate(thirtyDaysAgo),
-    endDate: formatDate(now),
-  };
-}
-
-function formatDate(d: Date): string {
-  return d.toISOString().split("T")[0];
+function jsonResponse(body: unknown, status: number): Response {
+    return new Response(JSON.stringify(body), {
+    status,
+    headers: {
+      ...corsHeaders,
+      "Content-Type": "application/json",
+    },
+  });
 }

@@ -75,7 +75,7 @@ CREATE POLICY "profiles_admin_insert"
   ON profiles FOR INSERT
   WITH CHECK (public.is_admin());
 
--- 4. Afiliado pode inserir seu próprio perfil (primeiro acesso)
+-- 4. Vendedor pode inserir seu próprio perfil (primeiro acesso)
 CREATE POLICY "profiles_insert_own"
   ON profiles FOR INSERT
   WITH CHECK (id = auth.uid() AND role = 'affiliate');
@@ -86,7 +86,7 @@ CREATE POLICY "profiles_admin_update"
   USING (public.is_admin())
   WITH CHECK (public.is_admin());
 
--- 6. Admin pode DELETE apenas afiliados (não outros admins)
+-- 6. Admin pode DELETE apenas vendedores (não outros admins)
 CREATE POLICY "profiles_admin_delete"
   ON profiles FOR DELETE
   USING (public.is_admin() AND role = 'affiliate');
@@ -125,7 +125,7 @@ CREATE POLICY "affiliate_links_admin_all"
   ON affiliate_links FOR ALL
   USING (public.is_admin());
 
--- Afiliado vê seus próprios links (sem profiles reference)
+-- Vendedor vê seus próprios links (sem profiles reference)
 CREATE POLICY "affiliate_links_select_own"
   ON affiliate_links FOR SELECT
   USING (

@@ -25,6 +25,7 @@ class _BankDataScreenState extends ConsumerState<BankDataScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final affiliateAsync = ref.watch(currentAffiliateProvider);
 
     return Scaffold(
@@ -36,7 +37,7 @@ class _BankDataScreenState extends ConsumerState<BankDataScreen> {
         error: (e, _) => Center(child: Text('Erro ao carregar dados: $e')),
         data: (affiliate) {
           if (affiliate == null) {
-            return const Center(child: Text('Afiliado não encontrado'));
+            return const Center(child: Text('Vendedor não encontrado'));
           }
           if (!_loadedOnce) {
             _pixCtrl.text = affiliate.chavePix ?? '';
@@ -51,19 +52,19 @@ class _BankDataScreenState extends ConsumerState<BankDataScreen> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: AppColors.ecoGreenSurface,
+                    color: colorScheme.primaryContainer,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.info_outline, size: 18, color: AppColors.ecoGreenDark),
+                      Icon(Icons.info_outline, size: 18, color: colorScheme.onPrimaryContainer),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
                           'Essa chave é usada para o pagamento das suas comissões.',
                           style: TextStyle(
                             fontSize: 12,
-                            color: AppColors.ecoGreenDark,
+                            color: colorScheme.onPrimaryContainer,
                           ),
                         ),
                       ),

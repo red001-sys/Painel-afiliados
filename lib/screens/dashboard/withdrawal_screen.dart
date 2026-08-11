@@ -237,10 +237,10 @@ class _WithdrawalForm extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                gradient: const LinearGradient(
+                gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
-                  colors: [AppColors.ecoGreen, AppColors.ecoGreenDark],
+                  colors: [colorScheme.primary, colorScheme.onPrimaryContainer],
                 ),
                 borderRadius: BorderRadius.circular(16),
               ),

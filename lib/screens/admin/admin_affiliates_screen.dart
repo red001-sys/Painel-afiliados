@@ -58,7 +58,7 @@ class _AdminAffiliatesScreenState extends ConsumerState<AdminAffiliatesScreen> {
                 children: [
                   const Icon(Icons.error_outline, size: 48, color: AppColors.error),
                   const SizedBox(height: 16),
-                  const Text('Erro ao carregar afiliados'),
+                  const Text('Erro ao carregar vendedores'),
                   const SizedBox(height: 12),
                   ElevatedButton(
                     onPressed: () => ref.invalidate(adminAffiliatesWithStatsProvider),
@@ -86,7 +86,7 @@ class _AdminAffiliatesScreenState extends ConsumerState<AdminAffiliatesScreen> {
                         color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.2)),
                       const SizedBox(height: 16),
                       Text(
-                        _search.isNotEmpty ? 'Nenhum afiliado encontrado' : 'Nenhum afiliado cadastrado',
+                        _search.isNotEmpty ? 'Nenhum vendedor encontrado' : 'Nenhum vendedor cadastrado',
                         style: TextStyle(
                           fontSize: 16,
                           color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
@@ -149,7 +149,7 @@ class _AdminAffiliatesScreenState extends ConsumerState<AdminAffiliatesScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const Text(
-                'Novo Afiliado',
+                'Novo Vendedor',
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
               ),
               SizedBox(height: AppTheme.spacingLG),
@@ -223,7 +223,7 @@ class _AdminAffiliatesScreenState extends ConsumerState<AdminAffiliatesScreen> {
                       ref.invalidate(adminAffiliatesWithStatsProvider);
                       if (mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Afiliado criado com sucesso')),
+                          const SnackBar(content: Text('Vendedor criado com sucesso')),
                         );
                       }
                     } catch (e, stackTrace) {
@@ -291,11 +291,11 @@ class _AffiliateTile extends ConsumerWidget {
             Row(
               children: [
                 CircleAvatar(
-                  backgroundColor: (isActive ? AppColors.ecoGreen : Colors.orange)
+                  backgroundColor: (isActive ? colorScheme.primary : Colors.orange)
                       .withValues(alpha: 0.1),
                   child: Icon(
                     Icons.person_rounded,
-                    color: isActive ? AppColors.ecoGreen : Colors.orange,
+                    color: isActive ? colorScheme.primary : Colors.orange,
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -321,7 +321,7 @@ class _AffiliateTile extends ConsumerWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                   decoration: BoxDecoration(
-                    color: (isActive ? AppColors.ecoGreen : Colors.orange)
+                    color: (isActive ? colorScheme.primary : Colors.orange)
                         .withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
@@ -330,7 +330,7 @@ class _AffiliateTile extends ConsumerWidget {
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
-                      color: isActive ? AppColors.ecoGreen : Colors.orange,
+                      color: isActive ? colorScheme.primary : Colors.orange,
                     ),
                   ),
                 ),
@@ -363,13 +363,13 @@ class _AffiliateTile extends ConsumerWidget {
                 _StatBadge(
                   label: 'Vendas',
                   value: '$salesCount',
-                  color: AppColors.ecoGreen,
+                  color: colorScheme.primary,
                 ),
                 const SizedBox(width: 8),
                 _StatBadge(
                   label: 'Comissão',
                   value: 'US\$ ${totalCommission.toStringAsFixed(2)}',
-                  color: AppColors.ecoGreen,
+                  color: colorScheme.primary,
                 ),
                 const SizedBox(width: 8),
                 _StatBadge(
@@ -412,7 +412,7 @@ class _AffiliateTile extends ConsumerWidget {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Excluir afiliado'),
+        title: const Text('Excluir vendedor'),
         content: Text('Deseja excluir ${affiliate.nome ?? affiliate.email}?'),
         actions: [
           TextButton(
@@ -432,7 +432,7 @@ class _AffiliateTile extends ConsumerWidget {
         await ref.read(adminRepositoryProvider).deleteAffiliate(affiliate.id);
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Afiliado excluído')),
+            const SnackBar(content: Text('Vendedor excluído')),
           );
         }
         onRefresh();

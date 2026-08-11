@@ -38,7 +38,7 @@ class _PersonalDataScreenState extends ConsumerState<PersonalDataScreen> {
         error: (e, _) => Center(child: Text('Erro ao carregar dados: $e')),
         data: (affiliate) {
           if (affiliate == null) {
-            return const Center(child: Text('Afiliado não encontrado'));
+            return const Center(child: Text('Vendedor não encontrado'));
           }
           if (!_loadedOnce) {
             _nomeCtrl.text = affiliate.nome ?? '';

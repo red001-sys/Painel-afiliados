@@ -42,11 +42,11 @@ class _AdminSyncScreenState extends ConsumerState<AdminSyncScreen> {
               children: [
                 Row(
                   children: [
-                    const Icon(Icons.sync_rounded,
-                        color: AppColors.ecoGreen),
+                    Icon(Icons.sync_rounded,
+                        color: colorScheme.primary),
                     const SizedBox(width: 8),
                     Text(
-                      'Sincronizar RedStar',
+                      'Sincronizar Nex',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -134,9 +134,9 @@ class _AdminSyncScreenState extends ConsumerState<AdminSyncScreen> {
       await executeSync(ref);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Sincronização concluída!'),
-            backgroundColor: AppColors.ecoGreen,
+          SnackBar(
+            content: const Text('Sincronização concluída!'),
+            backgroundColor: Theme.of(context).colorScheme.primary,
           ),
         );
       }

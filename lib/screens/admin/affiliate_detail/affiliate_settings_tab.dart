@@ -23,10 +23,10 @@ class _AffiliateSettingsTabState extends ConsumerState<AffiliateSettingsTab> {
 
     return affiliateAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, _) => const Center(child: Text('Erro ao carregar afiliado')),
+      error: (e, _) => const Center(child: Text('Erro ao carregar vendedor')),
       data: (affiliate) {
         if (affiliate == null) {
-          return const Center(child: Text('Afiliado não encontrado'));
+          return const Center(child: Text('Vendedor não encontrado'));
         }
 
         return SingleChildScrollView(
@@ -35,7 +35,7 @@ class _AffiliateSettingsTabState extends ConsumerState<AffiliateSettingsTab> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
-                'Editar Afiliado',
+                'Editar Vendedor',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
               ),
               SizedBox(height: AppTheme.spacingLG),
@@ -58,7 +58,7 @@ class _AffiliateSettingsTabState extends ConsumerState<AffiliateSettingsTab> {
                   onPressed: () => _deleteAffiliate(context, affiliate),
                   icon: const Icon(Icons.delete_rounded, color: AppColors.error),
                   label: const Text(
-                    'Excluir Afiliado',
+                    'Excluir Vendedor',
                     style: TextStyle(color: AppColors.error),
                   ),
                   style: OutlinedButton.styleFrom(
@@ -78,7 +78,7 @@ class _AffiliateSettingsTabState extends ConsumerState<AffiliateSettingsTab> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Excluir afiliado'),
+        title: const Text('Excluir vendedor'),
         content: Text(
           'Deseja excluir ${affiliate.nome ?? affiliate.email}? '
           'Todos os links e dados associados serão removidos.',
@@ -206,7 +206,7 @@ class _EditFormState extends ConsumerState<_EditForm> {
           contentPadding: EdgeInsets.zero,
           title: const Text('Ativo'),
           subtitle: Text(
-            _isActive ? 'Afiliado com acesso ativo' : 'Afiliado pendente de ativação',
+            _isActive ? 'Vendedor com acesso ativo' : 'Vendedor pendente de ativação',
             style: TextStyle(
               fontSize: 12,
               color: colorScheme.onSurface.withValues(alpha: 0.5),
@@ -214,7 +214,7 @@ class _EditFormState extends ConsumerState<_EditForm> {
           ),
           value: _isActive,
           onChanged: (v) => setState(() => _isActive = v),
-          activeColor: AppColors.ecoGreen,
+          activeColor: colorScheme.primary,
         ),
         SizedBox(height: AppTheme.spacingLG),
         SizedBox(
@@ -259,7 +259,7 @@ class _EditFormState extends ConsumerState<_EditForm> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Afiliado atualizado')),
+          const SnackBar(content: Text('Vendedor atualizado')),
         );
       }
     } catch (e) {

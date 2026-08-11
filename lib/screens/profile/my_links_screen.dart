@@ -11,6 +11,7 @@ class MyLinksScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colorScheme = Theme.of(context).colorScheme;
     final affiliateAsync = ref.watch(currentAffiliateProvider);
 
     return Scaffold(
@@ -22,7 +23,7 @@ class MyLinksScreen extends ConsumerWidget {
         error: (e, _) => Center(child: Text('Erro ao carregar: $e')),
         data: (affiliate) {
           if (affiliate == null) {
-            return const Center(child: Text('Afiliado não encontrado'));
+            return const Center(child: Text('Vendedor não encontrado'));
           }
 
           final linksAsync = ref.watch(affiliateLinksProvider(affiliate.id));
@@ -104,10 +105,10 @@ class MyLinksScreen extends ConsumerWidget {
                                 if (link.productPreco != null)
                                   Text(
                                     '\$ ${link.productPreco!.toStringAsFixed(2)}',
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontSize: 13,
                                       fontWeight: FontWeight.w600,
-                                      color: AppColors.ecoGreenDark,
+                                      color: colorScheme.onPrimaryContainer,
                                     ),
                                   ),
                                 if (link.productDescricao != null)

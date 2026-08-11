@@ -53,9 +53,9 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
       }
       if (next.success) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Senha alterada com sucesso!'),
-            backgroundColor: AppColors.ecoGreen,
+          SnackBar(
+            content: const Text('Senha alterada com sucesso!'),
+            backgroundColor: colorScheme.primary,
           ),
         );
         Future.delayed(const Duration(milliseconds: 1200), () {
@@ -85,13 +85,13 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
                     width: 72,
                     height: 72,
                     decoration: BoxDecoration(
-                      color: AppColors.ecoGreen.withValues(alpha: 0.1),
+                      color: colorScheme.primary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(20),
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.lock_outline_rounded,
                       size: 40,
-                      color: AppColors.ecoGreen,
+                      color: colorScheme.primary,
                     ),
                   ),
                 ),

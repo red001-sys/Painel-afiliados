@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../core/constants/app_colors.dart';
+import '../../models/video.dart';
 import '../../providers/video_provider.dart';
 import '../../widgets/video_preview.dart';
+import '../../widgets/video_thumbnail.dart';
 
 class VideosTab extends ConsumerWidget {
   const VideosTab({super.key});
@@ -67,93 +68,83 @@ class VideosTab extends ConsumerWidget {
             itemCount: videos.length,
             itemBuilder: (context, index) {
               final video = videos[index];
-              return Card(
-                margin: const EdgeInsets.only(bottom: 12),
-                clipBehavior: Clip.antiAlias,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    InkWell(
-                      onTap: () => VideoPreview.show(context, video.videoUrl, video.titulo),
-                      child: AspectRatio(
-                        aspectRatio: 16 / 9,
-                        child: Stack(
-                          fit: StackFit.expand,
-                          children: [
-                            if (video.thumbnailUrl != null)
-                              Image.network(
-                                video.thumbnailUrl!,
-                                fit: BoxFit.cover,
-                                errorBuilder: (_, __, ___) => Container(
-                                  color: AppColors.ecoGreen.withValues(alpha: 0.1),
-                                ),
-                              )
-                            else
-                              Container(color: AppColors.ecoGreen.withValues(alpha: 0.1)),
-                            Container(
-                              color: Colors.black.withValues(alpha: 0.15),
-                              child: const Center(
-                                child: CircleAvatar(
-                                  radius: 28,
-                                  backgroundColor: Colors.white,
-                                  child: Icon(Icons.play_arrow_rounded,
-                                      size: 32, color: AppColors.ecoGreenDark),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            video.titulo,
-                            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
-                          ),
-                          if (video.descricao != null && video.descricao!.isNotEmpty) ...[
-                            const SizedBox(height: 4),
-                            Text(
-                              video.descricao!,
-                              style: TextStyle(
-                                fontSize: 13,
-                                color: colorScheme.onSurface.withValues(alpha: 0.6),
-                              ),
-                            ),
-                          ],
-                          const SizedBox(height: 12),
-                          SizedBox(
-                            width: double.infinity,
-                            height: 42,
-                            child: ElevatedButton.icon(
-                              onPressed: () async {
-                                final launched = await launchUrl(
-                                  Uri.parse(_downloadUrl(video.videoUrl)),
-                                  mode: LaunchMode.externalApplication,
-                                );
-                                if (!launched && context.mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text('Não foi possível baixar o vídeo')),
-                                  );
-                                }
-                              },
-                              icon: const Icon(Icons.download_rounded, size: 18),
-                              label: const Text('Baixar'),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              );
+              return _buildVideoRow(context, video, colorScheme);
             },
           ),
         );
       },
+    );
+  }
+
+  Widget _buildVideoRow(BuildContext context, Video video, ColorScheme colorScheme) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 8),
+      child: InkWell(
+        onTap: () => VideoPreview.show(context, video.videoUrl, video.titulo),
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(10),
+          child: Row(
+            children: [
+              Stack(
+                children: [
+                  VideoThumbnail(video: video, size: 72),
+                  const Positioned.fill(
+                    child: Center(
+                      child: Icon(
+                        Icons.play_circle_fill_rounded,
+                        color: Colors.white,
+                        size: 28,
+                        shadows: [Shadow(color: Colors.black45, blurRadius: 6)],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      video.titulo,
+                      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    if (video.descricao != null && video.descricao!.isNotEmpty)
+                      Text(
+                        video.descricao!,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: colorScheme.onSurface.withValues(alpha: 0.5),
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              IconButton.filledTonal(
+                tooltip: 'Baixar',
+                onPressed: () async {
+                  final launched = await launchUrl(
+                    Uri.parse(_downloadUrl(video.videoUrl)),
+                    mode: LaunchMode.externalApplication,
+                  );
+                  if (!launched && context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Não foi possível baixar o vídeo')),
+                    );
+                  }
+                },
+                icon: const Icon(Icons.download_rounded, size: 20),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

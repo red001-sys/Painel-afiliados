@@ -26,15 +26,15 @@ abstract final class AppTheme {
     return _buildTheme(colorScheme);
   }
 
-  // Dark Theme
+  // Dark Theme (verde)
   static ThemeData get dark {
     final colorScheme = ColorScheme.fromSeed(
-      seedColor: AppColors.ecoGreen,
+      seedColor: AppColors.green,
       brightness: Brightness.dark,
-      primary: AppColors.ecoGreenLight,
+      primary: AppColors.greenLight,
       onPrimary: AppColors.neutral900,
-      primaryContainer: AppColors.ecoGreenDark,
-      onPrimaryContainer: AppColors.ecoGreenLight,
+      primaryContainer: AppColors.greenDark,
+      onPrimaryContainer: AppColors.greenLight,
       secondary: AppColors.neutral200,
       onSecondary: AppColors.neutral900,
       surface: AppColors.neutral800,

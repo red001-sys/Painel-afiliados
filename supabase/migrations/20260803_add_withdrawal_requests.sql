@@ -5,7 +5,7 @@ create table if not exists public.withdrawal_requests (
   affiliate_id uuid not null references public.affiliates(id) on delete cascade,
   valor numeric(12,2) not null check (valor > 0),
   status text not null default 'pendente' check (status in ('pendente', 'pago', 'cancelado')),
-  -- Guarda a chave PIX no momento do pedido (auditoria — o afiliado pode
+  -- Guarda a chave PIX no momento do pedido (auditoria — o vendedor pode
   -- trocar a chave depois, e precisamos saber pra onde foi pago cada saque)
   chave_pix_snapshot text,
   created_at timestamptz not null default now(),
@@ -17,12 +17,12 @@ create table if not exists public.withdrawal_requests (
 create index if not exists idx_withdrawal_requests_affiliate on public.withdrawal_requests(affiliate_id);
 create index if not exists idx_withdrawal_requests_status on public.withdrawal_requests(status);
 
-comment on table public.withdrawal_requests is 'Solicitações de saque de comissão feitas pelos afiliados';
-comment on column public.withdrawal_requests.chave_pix_snapshot is 'Chave PIX do afiliado no momento do pedido, pra auditoria caso ele troque depois';
+comment on table public.withdrawal_requests is 'Solicitações de saque de comissão feitas pelos vendedores';
+comment on column public.withdrawal_requests.chave_pix_snapshot is 'Chave PIX do vendedor no momento do pedido, pra auditoria caso ele troque depois';
 
 alter table public.withdrawal_requests enable row level security;
 
--- Afiliado vê só as próprias solicitações
+-- Vendedor vê só as próprias solicitações
 drop policy if exists "withdrawal_requests_select_own" on public.withdrawal_requests;
 create policy "withdrawal_requests_select_own"
   on public.withdrawal_requests for select
@@ -52,7 +52,7 @@ as $$
 declare
   v_balance numeric(12,2);
 begin
-  -- Só o próprio afiliado (ou admin) pode consultar o saldo
+  -- Só o próprio vendedor (ou admin) pode consultar o saldo
   if not public.is_admin() and not exists (
     select 1 from public.affiliates
     where id = p_affiliate_id and auth_user_id = auth.uid()
@@ -103,7 +103,7 @@ begin
   where auth_user_id = auth.uid();
 
   if v_affiliate_id is null then
-    raise exception 'Afiliado não encontrado para o usuário logado';
+    raise exception 'Vendedor não encontrado para o usuário logado';
   end if;
 
   if v_pix is null or v_pix = '' then

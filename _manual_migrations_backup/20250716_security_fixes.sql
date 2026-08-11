@@ -66,7 +66,7 @@ CREATE POLICY "profiles_admin_update"
     EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
   );
 
--- Admin pode deletar apenas perfis de afiliados (não outros admins)
+-- Admin pode deletar apenas perfis de vendedores (não outros admins)
 CREATE POLICY "profiles_admin_delete"
   ON profiles FOR DELETE
   USING (

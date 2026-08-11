@@ -43,6 +43,7 @@ class _AffiliateDetailShellState extends ConsumerState<AffiliateDetailShell>
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final affiliateAsync = ref.watch(affiliateDetailProvider(widget.affiliateId));
 
     return Scaffold(
@@ -58,10 +59,10 @@ class _AffiliateDetailShellState extends ConsumerState<AffiliateDetailShell>
         title: affiliateAsync.when(
           loading: () => const Text('Carregando...'),
           error: (_, __) => const Text('Erro'),
-          data: (a) => Text(a?.nome ?? a?.email ?? 'Afiliado'),
+          data: (a) => Text(a?.nome ?? a?.email ?? 'Vendedor'),
         ),
         centerTitle: true,
-        backgroundColor: AppColors.ecoGreenDark,
+        backgroundColor: colorScheme.onPrimaryContainer,
         foregroundColor: Colors.white,
         bottom: TabBar(
           controller: _tabController,
@@ -79,7 +80,7 @@ class _AffiliateDetailShellState extends ConsumerState<AffiliateDetailShell>
             children: [
               const Icon(Icons.error_outline, size: 48, color: AppColors.error),
               const SizedBox(height: 16),
-              const Text('Erro ao carregar afiliado'),
+              const Text('Erro ao carregar vendedor'),
               const SizedBox(height: 12),
               ElevatedButton(
                 onPressed: () => ref.invalidate(affiliateDetailProvider(widget.affiliateId)),
@@ -90,7 +91,7 @@ class _AffiliateDetailShellState extends ConsumerState<AffiliateDetailShell>
         ),
         data: (affiliate) {
           if (affiliate == null) {
-            return const Center(child: Text('Afiliado não encontrado'));
+            return const Center(child: Text('Vendedor não encontrado'));
           }
 
           return TabBarView(

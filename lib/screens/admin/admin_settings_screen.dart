@@ -26,9 +26,9 @@ class AdminSettingsScreen extends ConsumerWidget {
               children: [
                 CircleAvatar(
                   radius: 28,
-                  backgroundColor: AppColors.ecoGreen.withValues(alpha: 0.1),
-                  child: const Icon(Icons.admin_panel_settings_rounded,
-                    size: 32, color: AppColors.ecoGreen),
+                  backgroundColor: colorScheme.primary.withValues(alpha: 0.1),
+                  child: Icon(Icons.admin_panel_settings_rounded,
+                    size: 32, color: colorScheme.primary),
                 ),
                 const SizedBox(width: 16),
                 Column(
@@ -89,16 +89,16 @@ class AdminSettingsScreen extends ConsumerWidget {
               ListTile(
                 leading: const Icon(Icons.info_outline_rounded),
                 title: const Text('Sobre'),
-                subtitle: const Text('RedStar Painel v1.0.0'),
+                subtitle: const Text('Nex Painel v1.0.0'),
                 trailing: const Icon(Icons.chevron_right_rounded),
                 onTap: () => showAboutDialog(
                   context: context,
-                  applicationName: 'RedStar Painel',
+                  applicationName: 'Nex Painel',
                   applicationVersion: '1.0.0',
-                  applicationIcon: const Icon(Icons.bolt_rounded,
-                    size: 48, color: AppColors.ecoGreen),
+                  applicationIcon: Icon(Icons.bolt_rounded,
+                    size: 48, color: colorScheme.primary),
                   children: const [
-                    Text('Painel de Afiliados RedStar'),
+                    Text('Painel de Vendedores Nex'),
                   ],
                 ),
               ),

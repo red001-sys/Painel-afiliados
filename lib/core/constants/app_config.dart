@@ -5,7 +5,7 @@ abstract final class AppConfig {
 
   /// Esquema de deep link usado no fluxo de recuperação de senha.
   /// Precisa estar cadastrado em Supabase → Authentication → URL Configuration.
-  static const String passwordResetScheme = 'redstar';
+  static const String passwordResetScheme = 'nex';
 
   static const String passwordResetHost = 'reset-password';
 

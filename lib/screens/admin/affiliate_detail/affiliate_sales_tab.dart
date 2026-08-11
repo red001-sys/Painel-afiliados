@@ -22,6 +22,7 @@ class _AffiliateSalesTabState extends ConsumerState<AffiliateSalesTab> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final salesAsync = ref.watch(affiliateSalesProvider((
       affiliateId: widget.affiliateId,
       status: _statusFilter.isEmpty ? null : _statusFilter,
@@ -62,7 +63,7 @@ class _AffiliateSalesTabState extends ConsumerState<AffiliateSalesTab> {
                       label: 'Aprovado',
                       selected: _statusFilter == 'approved',
                       onTap: () => setState(() { _statusFilter = 'approved'; _page = 0; }),
-                      color: AppColors.ecoGreen,
+                      color: colorScheme.primary,
                     ),
                     _FilterChip(
                       label: 'Rejeitado',
@@ -150,20 +151,20 @@ class _AffiliateSalesTabState extends ConsumerState<AffiliateSalesTab> {
                   Padding(
                     padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
                     child: Card(
-                      color: AppColors.ecoGreen.withValues(alpha: 0.05),
+                      color: colorScheme.primary.withValues(alpha: 0.05),
                       child: Padding(
                         padding: const EdgeInsets.all(12),
                         child: Row(
                           children: [
                             Icon(Icons.today_rounded,
-                              color: AppColors.ecoGreen, size: 20),
+                              color: colorScheme.primary, size: 20),
                             const SizedBox(width: 8),
                             Text(
                               'Hoje',
                               style: TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w600,
-                                color: AppColors.ecoGreen,
+                                color: colorScheme.primary,
                               ),
                             ),
                             const SizedBox(width: 16),
@@ -336,7 +337,7 @@ class _SaleTile extends StatelessWidget {
     String statusLabel;
     switch (status) {
       case 'approved':
-        statusColor = AppColors.ecoGreen;
+        statusColor = colorScheme.primary;
         statusLabel = 'Aprovado';
       case 'pending':
         statusColor = Colors.orange;
@@ -412,7 +413,7 @@ class _SaleTile extends StatelessWidget {
                 _SaleStat(
                   label: 'Comissão',
                   value: 'US\$ ${commissionAmount.toStringAsFixed(2)}',
-                  color: AppColors.ecoGreen,
+                  color: colorScheme.primary,
                 ),
                 const Spacer(),
                 if (saleDate != null)

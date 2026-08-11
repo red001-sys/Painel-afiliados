@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
-import '../../../core/constants/app_colors.dart';
 import '../../../models/affiliate.dart';
 import '../../../providers/admin_provider.dart';
 
@@ -30,12 +29,12 @@ class AffiliateInfoTab extends ConsumerWidget {
                 children: [
                   CircleAvatar(
                     radius: 32,
-                    backgroundColor: (isActive ? AppColors.ecoGreen : Colors.orange)
+                    backgroundColor: (isActive ? colorScheme.primary : Colors.orange)
                         .withValues(alpha: 0.1),
                     child: Icon(
                       Icons.person_rounded,
                       size: 32,
-                      color: isActive ? AppColors.ecoGreen : Colors.orange,
+                      color: isActive ? colorScheme.primary : Colors.orange,
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -73,7 +72,7 @@ class AffiliateInfoTab extends ConsumerWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color: (isActive ? AppColors.ecoGreen : Colors.orange)
+                      color: (isActive ? colorScheme.primary : Colors.orange)
                           .withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -82,7 +81,7 @@ class AffiliateInfoTab extends ConsumerWidget {
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
-                        color: isActive ? AppColors.ecoGreen : Colors.orange,
+                        color: isActive ? colorScheme.primary : Colors.orange,
                       ),
                     ),
                   ),
@@ -120,7 +119,7 @@ class AffiliateInfoTab extends ConsumerWidget {
                         label: 'Valor Vendido',
                         value: 'US\$ ${((stats['totalSales'] ?? 0) as num).toStringAsFixed(2)}',
                         icon: Icons.payments_rounded,
-                        color: AppColors.ecoGreen,
+                        color: colorScheme.primary,
                       ),
                     ),
                   ],
@@ -133,7 +132,7 @@ class AffiliateInfoTab extends ConsumerWidget {
                         label: 'Comissão Total',
                         value: 'US\$ ${((stats['totalCommission'] ?? 0) as num).toStringAsFixed(2)}',
                         icon: Icons.attach_money_rounded,
-                        color: AppColors.ecoGreen,
+                        color: colorScheme.primary,
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -155,7 +154,7 @@ class AffiliateInfoTab extends ConsumerWidget {
                         label: 'Aprovada',
                         value: 'US\$ ${((stats['approvedCommission'] ?? 0) as num).toStringAsFixed(2)}',
                         icon: Icons.check_circle_outline,
-                        color: AppColors.ecoGreen,
+                        color: colorScheme.primary,
                       ),
                     ),
                     const Expanded(child: SizedBox()),

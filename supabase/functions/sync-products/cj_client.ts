@@ -10,7 +10,7 @@ export const ECOTLOW_ADVERTISER_NAME = "EcoFlow";
 // chamada sem keyword falhar pedindo keywords, usamos "ecoflow" como filtro
 // mínimo — o partnerIds já restringe os resultados à EcoFlow.
 const FALLBACK_KEYWORD = "ecoflow";
-// NOTA: o campo linkCode (deep link de afiliado) foi removido de propósito:
+// NOTA: o campo linkCode (deep link de vendedor) foi removido de propósito:
 // (1) gera links de forma lenta (~27s para 5 produtos) e
 // (2) exige um pid (website ID do publisher) que não temos — retornava
 //     "cannot access requested publisherid". O app usa links manuais com SID,

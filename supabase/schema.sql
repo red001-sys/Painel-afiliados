@@ -37,7 +37,7 @@ CREATE POLICY "profiles_insert_own"
 
 -- --------------------------------------------
 -- TABELA: affiliates
--- Armazena os afiliados cadastrados no sistema.
+-- Armazena os vendedores cadastrados no sistema.
 -- --------------------------------------------
 CREATE TABLE affiliates (
   id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -48,9 +48,9 @@ CREATE TABLE affiliates (
   created_at    TIMESTAMPTZ DEFAULT now()
 );
 
-COMMENT ON TABLE  affiliates              IS 'Afiliados cadastrados no sistema CJ Painel';
+COMMENT ON TABLE  affiliates              IS 'Vendedores cadastrados no sistema CJ Painel';
 COMMENT ON COLUMN affiliates.auth_user_id IS 'ID do usuário no Supabase Auth (FK implícita)';
-COMMENT ON COLUMN affiliates.sid          IS 'SID único do afiliado na CJ Affiliate';
+COMMENT ON COLUMN affiliates.sid          IS 'SID único do vendedor na CJ Affiliate';
 
 -- --------------------------------------------
 -- TABELA: sales
@@ -79,16 +79,16 @@ CREATE TABLE sales (
   updated_at              TIMESTAMPTZ DEFAULT now()
 );
 
-COMMENT ON TABLE  sales                           IS 'Vendas registradas via plataformas de afiliados';
+COMMENT ON TABLE  sales                           IS 'Vendas registradas via plataformas de vendedores';
 COMMENT ON COLUMN sales.affiliate_id              IS 'FK → affiliates.id (chave interna para joins)';
-COMMENT ON COLUMN sales.affiliate_sid             IS 'SID do afiliado na plataforma (auditoria / rastreamento)';
+COMMENT ON COLUMN sales.affiliate_sid             IS 'SID do vendedor na plataforma (auditoria / rastreamento)';
 COMMENT ON COLUMN sales.transaction_id            IS 'ID da transação na plataforma';
 COMMENT ON COLUMN sales.event_id                  IS 'ID do evento (quando disponível pela plataforma)';
 COMMENT ON COLUMN sales.action_id                 IS 'ID da ação (quando disponível pela plataforma)';
 COMMENT ON COLUMN sales.publisher_commission_id   IS 'ID da comissão do publisher (quando disponível)';
 COMMENT ON COLUMN sales.status                    IS 'Status: pending, approved, rejected, locked';
 COMMENT ON COLUMN sales.sale_amount               IS 'Valor total da venda';
-COMMENT ON COLUMN sales.commission_amount         IS 'Valor da comissão do afiliado';
+COMMENT ON COLUMN sales.commission_amount         IS 'Valor da comissão do vendedor';
 COMMENT ON COLUMN sales.updated_at                IS 'Última atualização do registro (status, valores, etc.)';
 
 -- --------------------------------------------
@@ -116,7 +116,7 @@ ALTER TABLE sales      ENABLE ROW LEVEL SECURITY;
 -- --------------------------------------------
 -- POLÍTICA: affiliates
 -- O usuário autenticado só pode ler o próprio
--- registro de afiliado (onde auth_user_id = uid).
+-- registro de vendedor (onde auth_user_id = uid).
 -- --------------------------------------------
 CREATE POLICY "affiliate_select_own"
   ON affiliates FOR SELECT
@@ -139,7 +139,7 @@ CREATE POLICY "sales_select_own"
 -- --------------------------------------------
 -- FUNÇÃO: link_affiliate_to_auth
 -- Chamada após o signUp para vincular o
--- auth_user_id ao registro do afiliado.
+-- auth_user_id ao registro do vendedor.
 -- SECURITY DEFINER para bypass do RLS.
 -- --------------------------------------------
 CREATE OR REPLACE FUNCTION link_affiliate_to_auth(
@@ -160,7 +160,7 @@ $$;
 
 -- --------------------------------------------
 -- FUNÇÃO: check_affiliate_for_first_access
--- Verifica se existe afiliado com o email
+-- Verifica se existe vendedor com o email
 -- e se já foi ativado. Usado no primeiro acesso.
 -- SECURITY DEFINER para bypass do RLS.
 -- --------------------------------------------
@@ -188,10 +188,10 @@ $$;
 
 -- --------------------------------------------
 -- FUNÇÃO: ensure_affiliate_exists
--- Após login, garante que o afiliado está
+-- Após login, garante que o vendedor está
 -- vinculado ao usuário autenticado.
 -- Caso não exista, cria automaticamente.
--- Retorna o registro do afiliado.
+-- Retorna o registro do vendedor.
 -- SECURITY DEFINER para bypass do RLS.
 -- --------------------------------------------
 CREATE OR REPLACE FUNCTION ensure_affiliate_exists()
@@ -215,7 +215,7 @@ BEGIN
     RAISE EXCEPTION 'Usuário não encontrado';
   END IF;
 
-  -- Busca afiliado existente pelo email
+  -- Busca vendedor existente pelo email
   SELECT * INTO v_affiliate
   FROM affiliates
   WHERE email = v_email
@@ -322,7 +322,7 @@ CREATE TABLE products (
   created_at  TIMESTAMPTZ DEFAULT now()
 );
 
-COMMENT ON TABLE products IS 'Produtos para geração de links de afiliados';
+COMMENT ON TABLE products IS 'Produtos para geração de links de vendedores';
 ALTER TABLE products ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "products_select_all"

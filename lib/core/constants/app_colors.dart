@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
 
 abstract final class AppColors {
-  // Blue Palette
+  // Blue Palette (tema claro)
   static const Color ecoGreen = Color(0xFF2196F3);
   static const Color ecoGreenLight = Color(0xFF64B5F6);
   static const Color ecoGreenDark = Color(0xFF1565C0);
   static const Color ecoGreenSurface = Color(0xFFE3F2FD);
+
+  // Green Palette (tema escuro)
+  static const Color green = Color(0xFF4CAF50);
+  static const Color greenLight = Color(0xFF81C784);
+  static const Color greenDark = Color(0xFF388E3C);
+  static const Color greenSurface = Color(0xFFE8F5E9);
 
   // Neutrals
   static const Color neutral50 = Color(0xFFFAFAFA);
@@ -20,7 +26,7 @@ abstract final class AppColors {
   static const Color neutral900 = Color(0xFF212121);
 
   // Semantic
-  static const Color success = Color(0xFF2196F3);
+  static const Color success = Color(0xFF4CAF50);
   static const Color error = Color(0xFFE53935);
   static const Color warning = Color(0xFFFF9800);
   static const Color info = Color(0xFF2196F3);

@@ -2,7 +2,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../../core/constants/app_colors.dart';
 import '../../core/routes/app_router.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -106,18 +105,19 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
       body: Container(
         width: size.width,
         height: size.height,
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              AppColors.ecoGreenDark,
-              AppColors.ecoGreen,
+              colorScheme.onPrimaryContainer,
+              colorScheme.primary,
             ],
           ),
         ),
@@ -141,7 +141,7 @@ class _SplashScreenState extends State<SplashScreen>
               ),
               const SizedBox(height: 24),
               const Text(
-                'RedStar Painel',
+                'Nex',
                 style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.w700,
@@ -151,7 +151,7 @@ class _SplashScreenState extends State<SplashScreen>
               ),
               const SizedBox(height: 8),
               Text(
-                'Painel de Afiliados',
+                'Painel de vendedores',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w400,

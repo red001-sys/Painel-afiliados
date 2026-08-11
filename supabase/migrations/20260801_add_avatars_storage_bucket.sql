@@ -1,4 +1,4 @@
--- Bucket público pra fotos de perfil dos afiliados. Sem isso, o upload de
+-- Bucket público pra fotos de perfil dos vendedores. Sem isso, o upload de
 -- foto no app falha com "Bucket not found" — o código já tentava usar
 -- este bucket, mas ele nunca foi criado.
 

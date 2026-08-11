@@ -8,6 +8,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../models/affiliate.dart';
 import '../../../models/affiliate_link.dart';
+import '../../../models/product.dart';
 import '../../../providers/admin_provider.dart';
 import '../../../providers/product_provider.dart';
 
@@ -33,6 +34,7 @@ class AffiliateLinksTab extends ConsumerStatefulWidget {
 class _AffiliateLinksTabState extends ConsumerState<AffiliateLinksTab> {
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final linksAsync = ref.watch(affiliateLinksProvider(widget.affiliateId));
 
     return Column(
@@ -41,7 +43,7 @@ class _AffiliateLinksTabState extends ConsumerState<AffiliateLinksTab> {
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
           child: Row(
             children: [
-              const Icon(Icons.info_outline, size: 16, color: AppColors.ecoGreen),
+              Icon(Icons.info_outline, size: 16, color: colorScheme.primary),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
@@ -155,14 +157,50 @@ class _AffiliateLinksTabState extends ConsumerState<AffiliateLinksTab> {
                 DropdownButtonFormField<String>(
                   value: selectedProductId,
                   decoration: const InputDecoration(labelText: 'Produto *'),
+                  isExpanded: true,
                   items: [
                     const DropdownMenuItem(
                       value: null,
                       child: Text('Selecionar produto...'),
                     ),
-                    ...ref.read(activeProductsProvider).valueOrNull?.map(
-                      (p) => DropdownMenuItem(value: p.id, child: Text(p.nome)),
-                    ) ?? [],
+                    ..._dedupedSellableProducts(ref.read(activeProductsProvider).valueOrNull)
+                        .map(
+                      (p) => DropdownMenuItem(
+                        value: p.id,
+                        child: Row(
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(4),
+                              child: SizedBox(
+                                width: 28,
+                                height: 28,
+                                child: p.imagemUrl != null
+                                    ? Image.network(
+                                        p.imagemUrl!,
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (_, __, ___) => Container(
+                                          color: AppColors.neutral200,
+                                          child: const Icon(Icons.inventory_2_outlined, size: 16),
+                                        ),
+                                      )
+                                    : Container(
+                                        color: AppColors.neutral200,
+                                        child: const Icon(Icons.inventory_2_outlined, size: 16),
+                                      ),
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                p.nome,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                   ],
                   onChanged: (v) => setModalState(() => selectedProductId = v),
                 ),
@@ -170,7 +208,7 @@ class _AffiliateLinksTabState extends ConsumerState<AffiliateLinksTab> {
                 TextField(
                   controller: finalLinkCtrl,
                   decoration: const InputDecoration(
-                    labelText: 'Link de afiliado *',
+                    labelText: 'Link de vendedor *',
                     hintText: 'Cole o link completo com SID incluso',
                   ),
                   maxLines: 3,
@@ -181,7 +219,7 @@ class _AffiliateLinksTabState extends ConsumerState<AffiliateLinksTab> {
                   title: const Text('Ativo'),
                   value: ativo,
                   onChanged: (v) => setModalState(() => ativo = v),
-                  activeColor: AppColors.ecoGreen,
+                  activeColor: Theme.of(ctx).colorScheme.primary,
                 ),
                 SizedBox(height: AppTheme.spacingXL),
                 SizedBox(
@@ -345,8 +383,8 @@ class _LinkTile extends StatelessWidget {
                       errorBuilder: (_, __, ___) => Container(
                         width: 48,
                         height: 48,
-                        color: AppColors.ecoGreen.withValues(alpha: 0.1),
-                        child: const Icon(Icons.inventory_2_rounded, size: 24, color: AppColors.ecoGreen),
+                        color: colorScheme.primary.withValues(alpha: 0.1),
+                        child: Icon(Icons.inventory_2_rounded, size: 24, color: colorScheme.primary),
                       ),
                     ),
                   )
@@ -355,10 +393,10 @@ class _LinkTile extends StatelessWidget {
                     width: 48,
                     height: 48,
                     decoration: BoxDecoration(
-                      color: AppColors.ecoGreen.withValues(alpha: 0.1),
+                      color: colorScheme.primary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: const Icon(Icons.inventory_2_rounded, size: 24, color: AppColors.ecoGreen),
+                    child: Icon(Icons.inventory_2_rounded, size: 24, color: colorScheme.primary),
                   ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -380,10 +418,10 @@ class _LinkTile extends StatelessWidget {
                       if (link.productPreco != null)
                         Text(
                           '\$ ${link.productPreco!.toStringAsFixed(2)}',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
-                            color: AppColors.ecoGreenDark,
+                            color: colorScheme.onPrimaryContainer,
                           ),
                         ),
                       if (link.productDescricao != null)
@@ -402,7 +440,7 @@ class _LinkTile extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                   decoration: BoxDecoration(
-                    color: (link.ativo ? AppColors.ecoGreen : Colors.orange).withValues(alpha: 0.1),
+                    color: (link.ativo ? colorScheme.primary : Colors.orange).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
@@ -410,7 +448,7 @@ class _LinkTile extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
-                      color: link.ativo ? AppColors.ecoGreen : Colors.orange,
+                      color: link.ativo ? colorScheme.primary : Colors.orange,
                     ),
                   ),
                 ),
@@ -498,7 +536,7 @@ class _LinkTile extends StatelessWidget {
                   icon: Icon(
                     link.ativo ? Icons.toggle_on_rounded : Icons.toggle_off_rounded,
                     size: 24,
-                    color: link.ativo ? AppColors.ecoGreen : Colors.orange,
+                    color: link.ativo ? colorScheme.primary : Colors.orange,
                   ),
                   tooltip: link.ativo ? 'Desativar' : 'Ativar',
                   onPressed: () => onToggle(!link.ativo),
@@ -544,6 +582,45 @@ String? _validateCjLink(String url) {
   return null;
 }
 
+/// Filtra itens de "produto" que na verdade são taxas/serviços agregados
+/// vindos do feed da CJ (não são coisas que um vendedor divulgaria), e
+/// remove duplicatas — o mesmo produto costuma aparecer várias vezes no
+/// feed (variações de cor/tamanho, ou porque bateu em mais de uma palavra
+/// de busca da sincronização), mas pra escolher um link só faz sentido
+/// mostrar uma vez por nome.
+List<Product> _dedupedSellableProducts(List<Product>? products) {
+  if (products == null) return [];
+
+  const junkNamePatterns = [
+    'shipping protection',
+    'turnkey installation service',
+    'installation service',
+    'extended warranty',
+    'protection plan',
+    'price match',
+  ];
+
+  final testSuffixPattern = RegExp(r'\btest\b', caseSensitive: false);
+
+  final seenNames = <String>{};
+  final result = <Product>[];
+
+  for (final p in products) {
+    final normalizedName = p.nome.trim().toLowerCase();
+
+    final isJunk = junkNamePatterns.any((pattern) => normalizedName.contains(pattern)) ||
+        testSuffixPattern.hasMatch(normalizedName);
+    if (isJunk) continue;
+
+    if (seenNames.contains(normalizedName)) continue;
+    seenNames.add(normalizedName);
+
+    result.add(p);
+  }
+
+  return result;
+}
+
 String? _validateSid(String url, String affiliateSid) {
   final uri = Uri.tryParse(url);
   if (uri == null) return null;
@@ -552,7 +629,7 @@ String? _validateSid(String url, String affiliateSid) {
   if (linkSid == null) return null;
 
   if (linkSid != affiliateSid) {
-    return 'O SID do link ($linkSid) não corresponde ao SID deste afiliado ($affiliateSid).';
+    return 'O SID do link ($linkSid) não corresponde ao SID deste vendedor ($affiliateSid).';
   }
 
   return null;

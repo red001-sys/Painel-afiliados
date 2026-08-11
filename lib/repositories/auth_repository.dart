@@ -33,7 +33,7 @@ class AuthRepository {
     required String redirectTo,
   }) async {
     await _client.auth.resetPasswordForEmail(
-      email: email,
+      email,
       redirectTo: redirectTo,
     );
   }

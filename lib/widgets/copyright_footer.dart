@@ -12,7 +12,7 @@ class CopyrightFooter extends StatelessWidget {
       child: Column(
         children: [
           Text(
-            '© RedStar 2026',
+            '© Nex 2026',
             style: TextStyle(fontSize: 11, color: Colors.grey[500]),
           ),
           const SizedBox(height: 2),

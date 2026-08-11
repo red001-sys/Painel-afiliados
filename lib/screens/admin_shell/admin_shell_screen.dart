@@ -7,7 +7,6 @@ import '../admin/admin_affiliates_screen.dart';
 import '../admin/admin_dashboard_screen.dart';
 import '../admin/admin_products_screen.dart';
 import '../admin/admin_settings_screen.dart';
-import '../admin/admin_ranking_screen.dart';
 import '../admin/admin_sync_screen.dart';
 import '../admin/admin_videos_screen.dart';
 import '../admin/admin_withdrawals_screen.dart';
@@ -24,12 +23,11 @@ class _AdminShellScreenState extends ConsumerState<AdminShellScreen> {
 
   static const _titles = [
     'Dashboard',
-    'Afiliados',
+    'Vendedores',
     'Produtos',
     'Vídeos',
-    'Ranking',
     'Saques',
-    'Sincronização RedStar',
+    'Sincronização Nex',
     'Configurações',
   ];
 
@@ -44,12 +42,10 @@ class _AdminShellScreenState extends ConsumerState<AdminShellScreen> {
       case 3:
         return const AdminVideosScreen();
       case 4:
-        return const AdminRankingScreen();
-      case 5:
         return const AdminWithdrawalsScreen();
-      case 6:
+      case 5:
         return const AdminSyncScreen();
-      case 7:
+      case 6:
         return const AdminSettingsScreen();
       default:
         return const AdminDashboardScreen();
@@ -58,6 +54,7 @@ class _AdminShellScreenState extends ConsumerState<AdminShellScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final width = MediaQuery.of(context).size.width;
     final isWide = width >= 800;
     final pendingCount =
@@ -75,10 +72,10 @@ class _AdminShellScreenState extends ConsumerState<AdminShellScreen> {
                 child: Column(
                   children: [
                     const SizedBox(height: 16),
-                    const Icon(Icons.bolt_rounded, size: 48, color: AppColors.ecoGreen),
+                    Icon(Icons.bolt_rounded, size: 48, color: colorScheme.primary),
                     const SizedBox(height: 8),
                     const Text(
-                      'RedStar Painel Admin',
+                      'Nex Painel Admin',
                       style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
                     ),
                     const Divider(),
@@ -90,7 +87,7 @@ class _AdminShellScreenState extends ConsumerState<AdminShellScreen> {
                     ),
                     _DrawerItem(
                       icon: Icons.people_rounded,
-                      label: 'Afiliados',
+                      label: 'Vendedores',
                       selected: _selectedIndex == 1,
                       onTap: () => setState(() { _selectedIndex = 1; Navigator.pop(context); }),
                     ),
@@ -107,30 +104,24 @@ class _AdminShellScreenState extends ConsumerState<AdminShellScreen> {
                       onTap: () => setState(() { _selectedIndex = 3; Navigator.pop(context); }),
                     ),
                     _DrawerItem(
-                      icon: Icons.leaderboard_rounded,
-                      label: 'Ranking',
+                      icon: Icons.payments_rounded,
+                      label: 'Saques',
                       selected: _selectedIndex == 4,
+                      badgeCount: pendingCount,
                       onTap: () => setState(() { _selectedIndex = 4; Navigator.pop(context); }),
                     ),
                     _DrawerItem(
-                      icon: Icons.payments_rounded,
-                      label: 'Saques',
-                      selected: _selectedIndex == 5,
-                      badgeCount: pendingCount,
-                      onTap: () => setState(() { _selectedIndex = 5; Navigator.pop(context); }),
-                    ),
-                    _DrawerItem(
                       icon: Icons.sync_rounded,
-                      label: 'Sincronização RedStar',
-                      selected: _selectedIndex == 6,
-                      onTap: () => setState(() { _selectedIndex = 6; Navigator.pop(context); }),
+                      label: 'Sincronização Nex',
+                      selected: _selectedIndex == 5,
+                      onTap: () => setState(() { _selectedIndex = 5; Navigator.pop(context); }),
                     ),
                     const Divider(),
                     _DrawerItem(
                       icon: Icons.settings_rounded,
                       label: 'Configurações',
-                      selected: _selectedIndex == 7,
-                      onTap: () => setState(() { _selectedIndex = 7; Navigator.pop(context); }),
+                      selected: _selectedIndex == 6,
+                      onTap: () => setState(() { _selectedIndex = 6; Navigator.pop(context); }),
                     ),
                   ],
                 ),
@@ -146,15 +137,15 @@ class _AdminShellScreenState extends ConsumerState<AdminShellScreen> {
                     selectedIndex: _selectedIndex,
                     onDestinationSelected: (i) => setState(() => _selectedIndex = i),
                     backgroundColor: Theme.of(context).colorScheme.surface,
-                    indicatorColor: AppColors.ecoGreen.withValues(alpha: 0.15),
-                    selectedIconTheme: const IconThemeData(color: AppColors.ecoGreen),
-                    selectedLabelTextStyle: const TextStyle(color: AppColors.ecoGreen, fontSize: 11),
+                    indicatorColor: colorScheme.primary.withValues(alpha: 0.15),
+                    selectedIconTheme: IconThemeData(color: colorScheme.primary),
+                    selectedLabelTextStyle: TextStyle(color: colorScheme.primary, fontSize: 11),
                     unselectedIconTheme: IconThemeData(
                       color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
                     ),
-                    leading: const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 12),
-                      child: Icon(Icons.bolt_rounded, size: 32, color: AppColors.ecoGreen),
+                    leading: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      child: Icon(Icons.bolt_rounded, size: 32, color: colorScheme.primary),
                     ),
                     labelType: NavigationRailLabelType.all,
                     destinations: [
@@ -164,7 +155,7 @@ class _AdminShellScreenState extends ConsumerState<AdminShellScreen> {
                       ),
                       const NavigationRailDestination(
                         icon: Icon(Icons.people_rounded),
-                        label: Text('Afiliados'),
+                        label: Text('Vendedores'),
                       ),
                       const NavigationRailDestination(
                         icon: Icon(Icons.inventory_2_rounded),
@@ -174,17 +165,13 @@ class _AdminShellScreenState extends ConsumerState<AdminShellScreen> {
                         icon: Icon(Icons.video_library_rounded),
                         label: Text('Vídeos'),
                       ),
-                      const NavigationRailDestination(
-                        icon: Icon(Icons.leaderboard_rounded),
-                        label: Text('Ranking'),
-                      ),
                       NavigationRailDestination(
                         icon: _iconWithBadge(Icons.payments_rounded, pendingCount),
                         label: const Text('Saques'),
                       ),
                       const NavigationRailDestination(
                         icon: Icon(Icons.sync_rounded),
-                        label: Text('Sync RedStar'),
+                        label: Text('Sync Nex'),
                       ),
                       const NavigationRailDestination(
                         icon: Icon(Icons.settings_rounded),
@@ -229,16 +216,17 @@ class _DrawerItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return ListTile(
       leading: Icon(
         icon,
-        color: selected ? AppColors.ecoGreen : null,
+        color: selected ? colorScheme.primary : null,
       ),
       title: Text(
         label,
         style: TextStyle(
           fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
-          color: selected ? AppColors.ecoGreen : null,
+          color: selected ? colorScheme.primary : null,
         ),
       ),
       trailing: badgeCount != null && badgeCount! > 0
@@ -248,7 +236,7 @@ class _DrawerItem extends StatelessWidget {
             )
           : null,
       selected: selected,
-      selectedTileColor: AppColors.ecoGreen.withValues(alpha: 0.08),
+      selectedTileColor: colorScheme.primary.withValues(alpha: 0.08),
       onTap: onTap,
     );
   }

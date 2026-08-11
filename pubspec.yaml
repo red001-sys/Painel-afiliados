@@ -43,12 +43,14 @@ dependencies:
   image_picker: ^1.1.2
   shared_preferences: ^2.3.0
   app_links: ^6.4.0
+  video_thumbnail: ^0.5.3
+  path_provider: ^2.1.5
 
 # Pinned below 2.3.0: that version switched path_provider_android's
 # internal implementation to JNI, which pulls in a CMake/NDK native build
 # step. The Android SDK's bundled cmake package is x86_64-only and has no
-# ARM64 build, so it can't run on aarch64 build hosts. path_provider itself
-# is a transitive dependency (pulled in by share_plus), not used directly.
+# ARM64 build, so it can't run on aarch64 build hosts. path_provider is
+# used directly here (via video_thumbnail_generator_io.dart).
 dependency_overrides:
   path_provider_android: 2.2.23
 

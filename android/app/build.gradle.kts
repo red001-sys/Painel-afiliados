@@ -112,6 +112,17 @@ android {
             } else {
                 signingConfig = signingConfigs.getByName("debug")
             }
+
+            // Ofusca nomes de classe/método e remove código morto (R8) +
+            // remove recursos não usados. Isso é sobre a camada
+            // Java/Kotlin do app (plugins nativos); o código Dart em si é
+            // ofuscado separadamente via `flutter build ... --obfuscate`.
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro",
+            )
         }
     }
 }

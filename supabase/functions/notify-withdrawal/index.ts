@@ -44,7 +44,7 @@ Deno.serve(async (req) => {
       .maybeSingle();
 
     const affiliateName =
-      affiliate?.nome ?? affiliate?.sid ?? "Afiliado desconhecido";
+      affiliate?.nome ?? affiliate?.sid ?? "Vendedor desconhecido";
 
     if (!resendKey || !adminEmail) {
       console.warn(
@@ -63,7 +63,7 @@ Deno.serve(async (req) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: "RedStar Vendedores <notificacoes@seudominio.com>",
+        from: "Nex Vendedores <notificacoes@seudominio.com>",
         to: [adminEmail],
         subject: `Nova solicitação de saque — ${affiliateName}`,
         html: `

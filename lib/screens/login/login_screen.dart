@@ -121,13 +121,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   width: 72,
                   height: 72,
                   decoration: BoxDecoration(
-                    color: AppColors.ecoGreen.withValues(alpha: 0.1),
+                    color: colorScheme.primary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(20),
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.bolt_rounded,
                     size: 40,
-                    color: AppColors.ecoGreen,
+                    color: colorScheme.primary,
                   ),
                 ),
               ),
@@ -144,7 +144,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ),
               SizedBox(height: AppTheme.spacingSM),
               Text(
-                'Acesse o painel de afiliados',
+                'Acesse o painel de vendedores',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 15,
@@ -235,7 +235,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
               // Footer
               Text(
-                'RedStar',
+                'Nex',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 13,

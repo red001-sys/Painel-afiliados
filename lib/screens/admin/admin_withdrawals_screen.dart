@@ -142,7 +142,7 @@ class _AdminWithdrawalsScreenState
         title: const Text('Confirmar pagamento'),
         content: Text(
           'Confirma que o PIX de R\$ ${request.valor.toStringAsFixed(2)} '
-          'para ${request.affiliateName ?? 'o afiliado'} foi pago? '
+          'para ${request.affiliateName ?? 'o vendedor'} foi pago? '
           'Esta ação não tem volta.',
         ),
         actions: [
@@ -227,7 +227,7 @@ class _WithdrawalTile extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        request.affiliateName ?? 'Afiliado',
+                        request.affiliateName ?? 'Vendedor',
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
@@ -267,7 +267,7 @@ class _WithdrawalTile extends StatelessWidget {
             const SizedBox(height: 12),
             Row(
               children: [
-                const Icon(Icons.attach_money_rounded, color: AppColors.ecoGreen),
+                Icon(Icons.attach_money_rounded, color: colorScheme.primary),
                 Text(
                   'R\$ ${request.valor.toStringAsFixed(2)}',
                   style: const TextStyle(
