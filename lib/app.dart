@@ -26,6 +26,7 @@ class CJApp extends ConsumerStatefulWidget {
 }
 
 class _CJAppState extends ConsumerState<CJApp> {
+  final _navigatorKey = GlobalKey<NavigatorState>();
   late final StreamSubscription<AuthState> _authSubscription;
   StreamSubscription<Uri>? _linkSubscription;
   final _appLinks = AppLinks();
@@ -58,12 +59,10 @@ class _CJAppState extends ConsumerState<CJApp> {
           debugPrint('[APP] tokenRefreshed');
         } else if (event == AuthChangeEvent.passwordRecovery) {
           debugPrint('[APP] passwordRecovery → navigating to reset password');
-          if (mounted) {
-            Navigator.of(context).pushNamedAndRemoveUntil(
-              AppRouter.resetPassword,
-              (route) => false,
-            );
-          }
+          _navigatorKey.currentState?.pushNamedAndRemoveUntil(
+            AppRouter.resetPassword,
+            (route) => false,
+          );
         }
       },
     );
@@ -96,12 +95,10 @@ class _CJAppState extends ConsumerState<CJApp> {
     }
     if (uri.scheme == AppConfig.passwordResetScheme) {
       debugPrint('[APP] Password reset deep link detected');
-      if (mounted) {
-        Navigator.of(context).pushNamedAndRemoveUntil(
-          AppRouter.resetPassword,
-          (route) => false,
-        );
-      }
+      _navigatorKey.currentState?.pushNamedAndRemoveUntil(
+        AppRouter.resetPassword,
+        (route) => false,
+      );
     }
   }
 
@@ -118,6 +115,7 @@ class _CJAppState extends ConsumerState<CJApp> {
     return MaterialApp(
       title: 'Nex Vendedores',
       debugShowCheckedModeBanner: false,
+      navigatorKey: _navigatorKey,
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
       themeMode: themeMode,
