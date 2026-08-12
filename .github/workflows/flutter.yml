@@ -73,25 +73,3 @@ jobs:
           # jeito de saber qual linha do código realmente quebrou.
           retention-days: 90
 
-  build-web:
-    runs-on: ubuntu-latest
-    env:
-      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-
-      - run: flutter pub get
-
-      - run: flutter build web
-
-      - name: Deploy Vercel
-        if: env.VERCEL_TOKEN != ''
-        env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-        run: npx vercel --prod --token=$VERCEL_TOKEN --yes --scope=team_i77BXExLoYezcDnRywHbmFY7
-        working-directory: build/web
