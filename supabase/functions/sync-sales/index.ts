@@ -54,6 +54,19 @@ serve(async (req: Request): Promise<Response> => {
     return jsonResponse({ success: false, error: "Unauthorized" }, 401);
   }
 
+  const { data: profile } = await supabaseAuth
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  if (profile?.role !== "admin") {
+    return jsonResponse(
+      { success: false, error: "Forbidden: admin access required" },
+      403,
+    );
+  }
+
   let config;
   try {
     config = loadConfig();

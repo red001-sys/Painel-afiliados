@@ -39,7 +39,7 @@ create policy "profiles_admin_update"
   using (public.is_admin())
   with check (public.is_admin());
 
--- Admin só apaga perfis de vendedor, nunca outro admin
+-- Admin só apaga perfis de afiliado, nunca outro admin
 create policy "profiles_admin_delete"
   on profiles for delete
   using (public.is_admin() and role = 'affiliate');

@@ -32,6 +32,17 @@ class _SplashScreenState extends State<SplashScreen>
 
   Future<void> _navigate() async {
     debugPrint('[SPLASH] _navigate() started');
+
+    // Se a URL indica um link de redefinição de senha, não navega daqui —
+    // deixa o listener de auth em app.dart levar pra tela de redefinir
+    // senha. Sem essa checagem, a sessão de recuperação (que também conta
+    // como "sessão existe") faz a splash mandar o usuário pro
+    // dashboard/admin por cima da navegação de redefinição.
+    if (Uri.base.toString().contains('type=recovery')) {
+      debugPrint('[SPLASH] Recovery link detected in URL → skipping normal navigation');
+      return;
+    }
+
     try {
       await Future.delayed(const Duration(milliseconds: 800));
       if (!mounted) return;

@@ -2,79 +2,105 @@ import { Transaction } from "../types.ts";
 import { CJConfig } from "../config.ts";
 import { AffiliateProvider } from "./provider.ts";
 
-const CJ_BASE_URL = "https://developers.cj.com/api/v3";
-const PAGE_SIZE = 100;
+// CJ's Commission Detail API is GraphQL, served from this dedicated host.
+// NOTE: developers.cj.com is only the docs/marketing site (it returns HTML,
+// not JSON) — that mismatch was the root cause of the
+// "Unexpected token '<', '<!doctype'... is not valid JSON" error. DO NOT
+// change this back to developers.cj.com/api/v3 — that endpoint doesn't
+// serve JSON and this exact bug will come back.
+const CJ_QUERY_URL = "https://commissions.api.cj.com/query";
 const REQUEST_TIMEOUT_MS = 15000;
+const MAX_PAGES = 50; // safety cap on cursor pagination per sync run
 
 interface CJCommissionRecord {
-  transactionId: string;
-  eventId: string | null;
-  actionId: string | null;
-  publisherCommissionId: string | null;
-  publisherId: string;
+  commissionId: string;
+  actionTrackerId: string | null;
+  actionStatus: string;
   advertiserId: string;
   advertiserName: string;
-  saleAmount: number;
-  commissionAmount: number;
-  currency: string;
-  status: string;
-  orderId: string;
-  transactionDate: string;
-  lockDate: string | null;
+  saleAmountUsd: string | null;
+  pubCommissionAmountUsd: string | null;
+  orderId: string | null;
+  eventDate: string;
+  lockingDate: string | null;
+  publisherId: string;
+  sid?: string | null;
+  shopperId?: string | null;
 }
 
-interface CJApiResponse {
-  metadata: {
-    totalResults: number;
-    pageNumber: number;
-    pageSize: number;
+interface CJGraphQLResponse {
+  data?: {
+    publisherCommissions?: {
+      count: number;
+      maxCommissionId: string | null;
+      payloadComplete: boolean;
+      records: CJCommissionRecord[];
+    };
   };
-  data: CJCommissionRecord[];
+  errors?: { message: string }[];
 }
 
 export class CJProvider implements AffiliateProvider {
   readonly name = "cj";
   private token: string;
-  private websiteId: string;
+  private publisherId: string;
 
   constructor(config: CJConfig) {
-    this.token = config.token;
-    this.websiteId = config.websiteId;
+    this.token = config.token.trim();
+    this.publisherId = config.websiteId.trim();
   }
 
   async fetchTransactions(
     startDate: string,
     endDate: string,
   ): Promise<Transaction[]> {
+    const allTransactions: Transaction[] = [];
+
+    for (const [chunkStart, chunkEnd] of splitDateRange(startDate, endDate, 31)) {
+      const chunkTransactions = await this.fetchTransactionsForRange(
+        chunkStart,
+        chunkEnd,
+      );
+      allTransactions.push(...chunkTransactions);
+    }
+
+    return allTransactions;
+  }
+
+  private async fetchTransactionsForRange(
+    startDate: string,
+    endDate: string,
+  ): Promise<Transaction[]> {
     const allRecords: CJCommissionRecord[] = [];
-    let page = 1;
-    let hasMore = true;
+    let sinceCommissionId: string | null = null;
+    let payloadComplete = false;
+    let page = 0;
     let retries = 0;
     const maxRetries = 2;
 
-    while (hasMore) {
+    while (!payloadComplete && page < MAX_PAGES) {
       try {
-        const response = await this.fetchPage(startDate, endDate, page);
+        const result = await this.fetchPage(
+          startDate,
+          endDate,
+          sinceCommissionId,
+        );
         retries = 0;
 
-        if (!response.data || response.data.length === 0) {
-          hasMore = false;
-          break;
-        }
-
-        allRecords.push(...response.data);
-
-        const totalPages = Math.ceil(
-          response.metadata.totalResults / PAGE_SIZE,
-        );
-        hasMore = page < totalPages;
+        allRecords.push(...result.records);
+        payloadComplete = result.payloadComplete;
+        sinceCommissionId = result.maxCommissionId;
         page++;
+
+        if (!sinceCommissionId) break;
       } catch (error) {
         const msg = error instanceof Error ? error.message : String(error);
         if (msg.includes("rate limited") && retries < maxRetries) {
           retries++;
           const delay = retries * 2000;
-          console.warn(`Rate limited, retrying in ${delay}ms (attempt ${retries}/${maxRetries})`);
+          console.warn(
+            `Rate limited, retrying in ${delay}ms (attempt ${retries}/${maxRetries})`,
+          );
           await new Promise((r) => setTimeout(r, delay));
           continue;
         }
@@ -90,18 +116,19 @@ export class CJProvider implements AffiliateProvider {
   private async fetchPage(
     startDate: string,
     endDate: string,
-    page: number,
-  ): Promise<CJApiResponse> {
-    const params = new URLSearchParams({
-      "website-id": this.websiteId,
-      "date-type": "transaction",
-      "start-date": startDate,
-      "end-date": endDate,
-      "page-number": page.toString(),
-      "page-size": PAGE_SIZE.toString(),
-    });
+    sinceCommissionId: string | null,
+  ): Promise<{
+    records: CJCommissionRecord[];
+    payloadComplete: boolean;
+    maxCommissionId: string | null;
+  }> {
+    const sincePostingDate = toCjInstant(startDate);
+    const beforePostingDate = toCjInstant(endDate);
+    const cursorArg = sinceCommissionId
+      ? `, sinceCommissionId: "${sinceCommissionId}"`
+      : "";
 
-    const url = `${CJ_BASE_URL}/commissions?${params.toString()}`;
+    const query = `{ publisherCommissions(forPublishers: ["${this.publisherId}"], sincePostingDate: "${sincePostingDate}", beforePostingDate: "${beforePostingDate}"${cursorArg}) { count maxCommissionId payloadComplete records { commissionId actionTrackerId actionStatus advertiserId advertiserName saleAmountUsd pubCommissionAmountUsd orderId eventDate lockingDate publisherId shopperId } } }`;
 
     const controller = new AbortController();
     const timeoutId = setTimeout(
@@ -110,12 +137,13 @@ export class CJProvider implements AffiliateProvider {
     );
 
     try {
-      const response = await fetch(url, {
-        method: "GET",
+      const response = await fetch(CJ_QUERY_URL, {
+        method: "POST",
         headers: {
           Authorization: `Bearer ${this.token}`,
           "Content-Type": "application/json",
         },
+        body: JSON.stringify({ query, variables: {} }),
         signal: controller.signal,
       });
 
@@ -125,36 +153,43 @@ export class CJProvider implements AffiliateProvider {
         throw await this.buildError(response);
       }
 
-      const body = await response.json();
-
-      if (!isValidCJResponse(body)) {
+      const contentType = response.headers.get("content-type") ?? "";
+      if (!contentType.includes("application/json")) {
+        const preview = (await response.text()).slice(0, 200);
         throw new Error(
-          "CJ API returned an unexpected response format.",
+          `CJ API returned non-JSON content-type "${contentType}". ` +
+            `First 200 chars: ${preview}`,
         );
       }
 
-      return body as CJApiResponse;
+      const body = (await response.json()) as CJGraphQLResponse;
+
+      if (body.errors && body.errors.length > 0) {
+        throw new Error(
+          `CJ GraphQL error (sent forPublishers=["${this.publisherId}"]): ` +
+            body.errors.map((e) => e.message).join("; "),
+        );
+      }
+
+      const result = body.data?.publisherCommissions;
+      if (!result) {
+        throw new Error("CJ API returned an unexpected response format.");
+      }
+
+      return {
+        records: result.records ?? [],
+        payloadComplete: result.payloadComplete,
+        maxCommissionId: result.maxCommissionId,
+      };
     } catch (error) {
       clearTimeout(timeoutId);
 
-      if (
-        error instanceof DOMException &&
-        error.name === "AbortError"
-      ) {
-        throw new Error(
-          "CJ API request timed out after 15 seconds.",
-        );
+      if (error instanceof DOMException && error.name === "AbortError") {
+        throw new Error("CJ API request timed out after 15 seconds.");
       }
 
       if (error instanceof TypeError) {
-        throw new Error(
-          "CJ API connection refused. Check network or URL.",
-        );
-      }
-
-      const errObj = error as { statusCode?: number; message?: string };
-      if (errObj.statusCode === 429) {
-        throw new Error("CJ API rate limited. Try again later.");
+        throw new Error("CJ API connection refused. Check network or URL.");
       }
 
       throw error;
@@ -162,60 +197,84 @@ export class CJProvider implements AffiliateProvider {
   }
 
   private async buildError(response: Response): Promise<Error> {
-    const body = await response.text().catch(() => "");
+    const bodyText = await response.text().catch(() => "");
+    const bodyPreview = bodyText.slice(0, 500);
 
     switch (response.status) {
       case 401:
         return new Error(
-          "CJ authentication failed. Verify CJ_PERSONAL_ACCESS_TOKEN.",
+          `CJ authentication failed. Verify CJ_PERSONAL_ACCESS_TOKEN. Body: ${bodyPreview}`,
         );
       case 403:
         return new Error(
-          "CJ access denied. Verify CJ_WEBSITE_ID and token permissions.",
+          `CJ access denied. Verify CJ_WEBSITE_ID (CID) and token permissions. Body: ${bodyPreview}`,
         );
       case 404:
-        return new Error(
-          "CJ API endpoint not found. Check CJ API base URL.",
-        );
+        return new Error(`CJ API endpoint not found. Body: ${bodyPreview}`);
       case 429:
-        return new Error("CJ API rate limited. Try again later.");
+        return new Error(`CJ API rate limited. Try again later. Body: ${bodyPreview}`);
       default:
-        return new Error(
-          `CJ API error ${response.status}`,
-        );
+        return new Error(`CJ API error ${response.status}. Body: ${bodyPreview}`);
     }
   }
+}
+
+function splitDateRange(
+  startDate: string,
+  endDate: string,
+  maxDays: number,
+): [string, string][] {
+  const chunks: [string, string][] = [];
+  let cursor = new Date(`${startDate}T00:00:00Z`);
+  const end = new Date(`${endDate}T00:00:00Z`);
+
+  while (cursor <= end) {
+    const chunkEnd = new Date(cursor);
+    chunkEnd.setUTCDate(chunkEnd.getUTCDate() + maxDays - 1);
+    if (chunkEnd > end) chunkEnd.setTime(end.getTime());
+
+    chunks.push([
+      cursor.toISOString().split("T")[0],
+      chunkEnd.toISOString().split("T")[0],
+    ]);
+
+    cursor = new Date(chunkEnd);
+    cursor.setUTCDate(cursor.getUTCDate() + 1);
+  }
+
+  return chunks;
+}
+
+function toCjInstant(dateStr: string): string {
+  if (dateStr.includes("T")) return dateStr;
+  return `${dateStr}T00:00:00Z`;
 }
 
 function mapToTransaction(
   record: CJCommissionRecord,
 ): Transaction | null {
-  const transactionId = String(record.transactionId ?? "").trim();
-  const publisherId = String(record.publisherId ?? "").trim();
+  const transactionId = String(record.commissionId ?? "").trim();
+  const affiliateSid = String(record.shopperId ?? record.sid ?? "").trim();
 
-  if (!transactionId || !publisherId) {
+  if (!transactionId || !affiliateSid) {
     return null;
   }
 
   return {
     transactionId,
-    eventId: record.eventId ? String(record.eventId) : null,
-    actionId: record.actionId ? String(record.actionId) : null,
-    publisherCommissionId: record.publisherCommissionId
-      ? String(record.publisherCommissionId)
-      : null,
-    affiliateSid: publisherId,
-    saleAmount: Number(record.saleAmount) || 0,
-    commissionAmount: Number(record.commissionAmount) || 0,
-    status: normalizeStatus(record.status),
-    saleDate: toISOTimestamp(record.transactionDate),
+    eventId: null,
+    actionId: record.actionTrackerId ? String(record.actionTrackerId) : null,
+    publisherCommissionId: transactionId,
+    affiliateSid,
+    saleAmount: Number(record.saleAmountUsd) || 0,
+    commissionAmount: Number(record.pubCommissionAmountUsd) || 0,
+    status: normalizeStatus(record.actionStatus),
+    saleDate: toISOTimestamp(record.eventDate),
     advertiser: String(record.advertiserName || ""),
     product: String(record.advertiserName || ""),
-    currency: String(record.currency || "USD"),
+    currency: "USD",
     orderId: String(record.orderId || ""),
-    lockedDate: record.lockDate
-      ? toISOTimestamp(record.lockDate)
-      : null,
+    lockedDate: record.lockingDate ? toISOTimestamp(record.lockingDate) : null,
   };
 }
 
@@ -223,9 +282,8 @@ function normalizeStatus(status: string): string {
   const s = (status || "").toLowerCase().trim();
   if (s === "new" || s === "extended") return "pending";
   if (s === "locked") return "locked";
-  if (s === "approved") return "approved";
-  if (s === "closed" || s === "rejected" || s === "cancelled")
-    return "rejected";
+  if (s === "closed") return "approved";
+  if (s === "rejected" || s === "cancelled") return "rejected";
   return s || "pending";
 }
 
@@ -233,20 +291,10 @@ function toISOTimestamp(dateStr: string): string {
   try {
     const d = new Date(dateStr);
     if (isNaN(d.getTime())) {
-      console.warn(`Invalid date value: ${dateStr}, using epoch fallback`);
       return "1970-01-01T00:00:00.000Z";
     }
     return d.toISOString();
   } catch {
-    console.warn(`Failed to parse date: ${dateStr}, using epoch fallback`);
     return "1970-01-01T00:00:00.000Z";
   }
-}
-
-function isValidCJResponse(body: unknown): boolean {
-  if (!body || typeof body !== "object") return false;
-  const obj = body as Record<string, unknown>;
-  if (!obj.metadata || typeof obj.metadata !== "object") return false;
-  if (!Array.isArray(obj.data)) return false;
-  return true;
 }
