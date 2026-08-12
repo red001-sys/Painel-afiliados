@@ -31,8 +31,8 @@ abstract final class AppTheme {
     final colorScheme = ColorScheme.fromSeed(
       seedColor: AppColors.green,
       brightness: Brightness.dark,
-      primary: AppColors.greenLight,
-      onPrimary: AppColors.neutral900,
+      primary: AppColors.green,
+      onPrimary: Colors.white,
       primaryContainer: AppColors.greenDark,
       onPrimaryContainer: AppColors.greenLight,
       secondary: AppColors.neutral200,
