@@ -47,4 +47,24 @@ class AffiliateLinkRepository {
   Future<void> delete(String id) async {
     await _client.from('affiliate_links').delete().eq('id', id);
   }
+
+  /// Retorna o conjunto de pares (affiliate_id, product_id) que já têm
+  /// link cadastrado — usado pra não duplicar na geração em massa.
+  Future<Set<String>> getExistingPairs() async {
+    final response = await _client
+        .from('affiliate_links')
+        .select('affiliate_id, product_id');
+
+    return (response as List)
+        .map((e) => '${e['affiliate_id']}|${e['product_id']}')
+        .toSet();
+  }
+
+  Future<int> createBulk(List<AffiliateLink> links) async {
+    if (links.isEmpty) return 0;
+    final payload = links.map((l) => l.toJson()).toList();
+    final response =
+        await _client.from('affiliate_links').insert(payload).select('id');
+    return (response as List).length;
+  }
 }

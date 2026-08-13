@@ -57,8 +57,15 @@ grant execute on function link_affiliate_to_auth(text) to authenticated, service
 revoke execute on function check_affiliate_for_first_access(text) from public, anon;
 grant execute on function check_affiliate_for_first_access(text) to authenticated, service_role;
 
-revoke execute on function ensure_affiliate_exists() from public, anon;
-grant execute on function ensure_affiliate_exists() to authenticated, service_role;
+do $$
+begin
+  if exists (
+    select 1 from pg_proc where proname = 'ensure_affiliate_exists'
+  ) then
+    execute 'revoke execute on function public.ensure_affiliate_exists() from public, anon';
+    execute 'grant execute on function public.ensure_affiliate_exists() to authenticated, service_role';
+  end if;
+end $$;
 
 -- Se a função abaixo existir no seu banco (sistema de ranking/estrelas),
 -- destrava. Se não existir ainda, essa linha só vai dar erro "function

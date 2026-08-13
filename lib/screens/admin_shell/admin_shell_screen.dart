@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/constants/app_colors.dart';
 import '../../providers/withdrawal_provider.dart';
 import '../admin/admin_affiliates_screen.dart';
+import '../admin/admin_bulk_links_screen.dart';
 import '../admin/admin_dashboard_screen.dart';
 import '../admin/admin_products_screen.dart';
 import '../admin/admin_settings_screen.dart';
@@ -96,6 +97,17 @@ class _AdminShellScreenState extends ConsumerState<AdminShellScreen> {
                       label: 'Produtos',
                       selected: _selectedIndex == 2,
                       onTap: () => setState(() { _selectedIndex = 2; Navigator.pop(context); }),
+                    ),
+                    _DrawerItem(
+                      icon: Icons.auto_awesome_rounded,
+                      label: 'Gerar Links em Massa',
+                      selected: false,
+                      onTap: () {
+                        Navigator.pop(context);
+                        Navigator.of(context).push(
+                          MaterialPageRoute(builder: (_) => const AdminBulkLinksScreen()),
+                        );
+                      },
                     ),
                     _DrawerItem(
                       icon: Icons.video_library_rounded,
