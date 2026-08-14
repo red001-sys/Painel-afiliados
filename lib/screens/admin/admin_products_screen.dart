@@ -288,6 +288,7 @@ class _ProductTile extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       child: ListTile(
+        onTap: () => _showProductDetails(context, product),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
         leading: product.imagemUrl != null
             ? ClipRRect(
@@ -412,6 +413,95 @@ class _ProductTile extends StatelessWidget {
 
   String _priceSymbol(Product product) {
     return product.currency?.toUpperCase() == 'USD' ? r'$' : r'R$';
+  }
+}
+
+void _showProductDetails(BuildContext context, Product product) {
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+    ),
+    builder: (ctx) {
+      final colorScheme = Theme.of(ctx).colorScheme;
+      return Padding(
+        padding: EdgeInsets.fromLTRB(20, 20, 20, MediaQuery.of(ctx).viewInsets.bottom + 24),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (product.imagemUrl != null)
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: AspectRatio(
+                    aspectRatio: 4 / 3,
+                    child: Image.network(
+                      product.imagemUrl!,
+                      fit: BoxFit.contain,
+                      errorBuilder: (_, __, ___) => Container(color: AppColors.neutral200),
+                    ),
+                  ),
+                ),
+              SizedBox(height: AppTheme.spacingMD),
+              Text(product.nome, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+              SizedBox(height: AppTheme.spacingSM),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  if (product.preco != null)
+                    _DetailChip(
+                      label: '${product.currency?.toUpperCase() == 'USD' ? '\$' : 'R\$'} ${product.preco!.toStringAsFixed(2)}',
+                      color: AppColors.ecoGreenDark,
+                    ),
+                  if (product.categoria != null && product.categoria!.isNotEmpty)
+                    _DetailChip(label: product.categoria!, color: colorScheme.primary),
+                  if (product.brand != null && product.brand!.isNotEmpty)
+                    _DetailChip(label: product.brand!, color: Colors.blueGrey),
+                  _DetailChip(
+                    label: product.ativo ? 'Ativo' : 'Inativo',
+                    color: product.ativo ? AppColors.ecoGreen : Colors.orange,
+                  ),
+                ],
+              ),
+              if (product.descricao != null && product.descricao!.isNotEmpty) ...[
+                SizedBox(height: AppTheme.spacingMD),
+                Text('Descrição', style: TextStyle(fontWeight: FontWeight.w600, color: colorScheme.onSurface)),
+                const SizedBox(height: 4),
+                Text(product.descricao!, style: TextStyle(color: colorScheme.onSurface.withValues(alpha: 0.7))),
+              ],
+              if (product.cjUrl != null && product.cjUrl!.isNotEmpty) ...[
+                SizedBox(height: AppTheme.spacingMD),
+                Text('Link base da CJ', style: TextStyle(fontWeight: FontWeight.w600, color: colorScheme.onSurface)),
+                const SizedBox(height: 4),
+                SelectableText(product.cjUrl!, style: TextStyle(fontSize: 12, color: colorScheme.onSurface.withValues(alpha: 0.6))),
+              ],
+            ],
+          ),
+        ),
+      );
+    },
+  );
+}
+
+class _DetailChip extends StatelessWidget {
+  const _DetailChip({required this.label, required this.color});
+
+  final String label;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(label, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: color)),
+    );
   }
 }
 

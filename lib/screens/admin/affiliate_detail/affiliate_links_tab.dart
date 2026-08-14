@@ -154,55 +154,71 @@ class _AffiliateLinksTabState extends ConsumerState<AffiliateLinksTab> {
                   style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
                 ),
                 SizedBox(height: AppTheme.spacingLG),
-                DropdownButtonFormField<String>(
-                  value: selectedProductId,
-                  decoration: const InputDecoration(labelText: 'Produto *'),
-                  isExpanded: true,
-                  items: [
-                    const DropdownMenuItem(
-                      value: null,
-                      child: Text('Selecionar produto...'),
-                    ),
-                    ..._dedupedSellableProducts(ref.read(activeProductsProvider).valueOrNull)
-                        .map(
-                      (p) => DropdownMenuItem(
-                        value: p.id,
+                Builder(
+                  builder: (fieldCtx) {
+                    final allProducts = ref.read(activeProductsProvider).valueOrNull;
+                    final sellable = _dedupedSellableProducts(allProducts);
+                    Product? selected;
+                    if (selectedProductId != null) {
+                      for (final p in sellable) {
+                        if (p.id == selectedProductId) {
+                          selected = p;
+                          break;
+                        }
+                      }
+                    }
+
+                    return InkWell(
+                      borderRadius: BorderRadius.circular(8),
+                      onTap: () async {
+                        final picked = await _showProductPicker(fieldCtx, sellable);
+                        if (picked != null) {
+                          setModalState(() => selectedProductId = picked.id);
+                        }
+                      },
+                      child: InputDecorator(
+                        decoration: const InputDecoration(labelText: 'Produto *'),
                         child: Row(
                           children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(4),
-                              child: SizedBox(
-                                width: 28,
-                                height: 28,
-                                child: p.imagemUrl != null
-                                    ? Image.network(
-                                        p.imagemUrl!,
-                                        fit: BoxFit.cover,
-                                        errorBuilder: (_, __, ___) => Container(
+                            if (selected != null) ...[
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(4),
+                                child: SizedBox(
+                                  width: 28,
+                                  height: 28,
+                                  child: selected.imagemUrl != null
+                                      ? Image.network(
+                                          selected.imagemUrl!,
+                                          fit: BoxFit.cover,
+                                          errorBuilder: (_, __, ___) => Container(
+                                            color: AppColors.neutral200,
+                                            child: const Icon(Icons.inventory_2_outlined, size: 16),
+                                          ),
+                                        )
+                                      : Container(
                                           color: AppColors.neutral200,
                                           child: const Icon(Icons.inventory_2_outlined, size: 16),
                                         ),
-                                      )
-                                    : Container(
-                                        color: AppColors.neutral200,
-                                        child: const Icon(Icons.inventory_2_outlined, size: 16),
-                                      ),
+                                ),
                               ),
-                            ),
-                            const SizedBox(width: 10),
+                              const SizedBox(width: 10),
+                            ],
                             Expanded(
                               child: Text(
-                                p.nome,
+                                selected?.nome ?? 'Selecionar produto...',
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
+                                style: selected == null
+                                    ? TextStyle(color: Theme.of(fieldCtx).colorScheme.onSurface.withValues(alpha: 0.5))
+                                    : null,
                               ),
                             ),
+                            const Icon(Icons.arrow_drop_down_rounded),
                           ],
                         ),
                       ),
-                    ),
-                  ],
-                  onChanged: (v) => setModalState(() => selectedProductId = v),
+                    );
+                  },
                 ),
                 SizedBox(height: AppTheme.spacingMD),
                 TextField(
@@ -598,6 +614,17 @@ List<Product> _dedupedSellableProducts(List<Product>? products) {
     'extended warranty',
     'protection plan',
     'price match',
+    // Peças pequenas/acessórios avulsos — normalmente não fazem sentido
+    // como produto próprio pro vendedor divulgar (é o item principal que
+    // se vende, não o cabo/peça de reposição dele).
+    'cable',
+    'connector',
+    'adapter',
+    'replacement part',
+    'spare part',
+    'screw',
+    'bracket',
+    'mounting kit',
   ];
 
   final testSuffixPattern = RegExp(r'\btest\b', caseSensitive: false);
@@ -619,6 +646,97 @@ List<Product> _dedupedSellableProducts(List<Product>? products) {
   }
 
   return result;
+}
+
+Future<Product?> _showProductPicker(BuildContext context, List<Product> products) {
+  return showModalBottomSheet<Product>(
+    context: context,
+    isScrollControlled: true,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+    ),
+    builder: (ctx) => _ProductPickerSheet(products: products),
+  );
+}
+
+class _ProductPickerSheet extends StatefulWidget {
+  const _ProductPickerSheet({required this.products});
+
+  final List<Product> products;
+
+  @override
+  State<_ProductPickerSheet> createState() => _ProductPickerSheetState();
+}
+
+class _ProductPickerSheetState extends State<_ProductPickerSheet> {
+  String _search = '';
+
+  @override
+  Widget build(BuildContext context) {
+    final filtered = _search.isEmpty
+        ? widget.products
+        : widget.products
+            .where((p) => p.nome.toLowerCase().contains(_search.toLowerCase()))
+            .toList();
+
+    return SizedBox(
+      height: MediaQuery.of(context).size.height * 0.75,
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
+            child: TextField(
+              autofocus: false,
+              decoration: const InputDecoration(
+                labelText: 'Buscar produto',
+                prefixIcon: Icon(Icons.search),
+              ),
+              onChanged: (v) => setState(() => _search = v),
+            ),
+          ),
+          Expanded(
+            child: filtered.isEmpty
+                ? const Center(child: Text('Nenhum produto encontrado'))
+                // ListView.builder só constrói (e só carrega a imagem) das
+                // linhas visíveis na tela — é isso que evita disparar
+                // centenas de downloads de imagem de uma vez, que era o
+                // que travava o app com o dropdown antigo.
+                : ListView.builder(
+                    itemCount: filtered.length,
+                    itemBuilder: (context, index) {
+                      final p = filtered[index];
+                      return ListTile(
+                        leading: ClipRRect(
+                          borderRadius: BorderRadius.circular(4),
+                          child: SizedBox(
+                            width: 40,
+                            height: 40,
+                            child: p.imagemUrl != null
+                                ? Image.network(
+                                    p.imagemUrl!,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (_, __, ___) => Container(
+                                      color: AppColors.neutral200,
+                                      child: const Icon(Icons.inventory_2_outlined, size: 18),
+                                    ),
+                                  )
+                                : Container(
+                                    color: AppColors.neutral200,
+                                    child: const Icon(Icons.inventory_2_outlined, size: 18),
+                                  ),
+                          ),
+                        ),
+                        title: Text(p.nome, maxLines: 2, overflow: TextOverflow.ellipsis),
+                        subtitle: p.preco != null ? Text('R\$ ${p.preco!.toStringAsFixed(2)}') : null,
+                        onTap: () => Navigator.of(context).pop(p),
+                      );
+                    },
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 String? _validateSid(String url, String affiliateSid) {

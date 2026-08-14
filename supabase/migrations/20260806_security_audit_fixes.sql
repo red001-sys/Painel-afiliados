@@ -39,7 +39,7 @@ create policy "profiles_admin_update"
   using (public.is_admin())
   with check (public.is_admin());
 
--- Admin só apaga perfis de afiliado, nunca outro admin
+-- Admin só apaga perfis de vendedor, nunca outro admin
 create policy "profiles_admin_delete"
   on profiles for delete
   using (public.is_admin() and role = 'affiliate');
@@ -48,34 +48,43 @@ create policy "profiles_admin_delete"
 -- 2) Revoga EXECUTE de anon/public em todas as
 --    funções SECURITY DEFINER do projeto
 -- --------------------------------------------
-revoke execute on function public.is_admin() from public, anon;
-grant execute on function public.is_admin() to authenticated, service_role;
-
-revoke execute on function link_affiliate_to_auth(text) from public, anon;
-grant execute on function link_affiliate_to_auth(text) to authenticated, service_role;
-
-revoke execute on function check_affiliate_for_first_access(text) from public, anon;
-grant execute on function check_affiliate_for_first_access(text) to authenticated, service_role;
-
+-- Cada revoke/grant é condicional (só roda se a função existir de
+-- verdade no banco) porque nem tudo que está documentado/no schema.sql
+-- necessariamente foi criado no banco remoto — schema.sql serve como
+-- referência histórica, não como fonte da verdade 100% atualizada.
 do $$
+declare
+  fn record;
+  fns text[][] := array[
+    ['is_admin', ''],
+    ['link_affiliate_to_auth', 'text'],
+    ['check_affiliate_for_first_access', 'text'],
+    ['ensure_affiliate_exists', ''],
+    ['award_affiliate_star', 'uuid'],
+    ['get_affiliate_balance', 'uuid'],
+    ['request_withdrawal', 'numeric'],
+    ['confirm_withdrawal_payment', 'uuid']
+  ];
+  i int;
+  fn_name text;
+  fn_args text;
+  fn_signature text;
 begin
-  if exists (
-    select 1 from pg_proc where proname = 'ensure_affiliate_exists'
-  ) then
-    execute 'revoke execute on function public.ensure_affiliate_exists() from public, anon';
-    execute 'grant execute on function public.ensure_affiliate_exists() to authenticated, service_role';
-  end if;
-end $$;
+  for i in 1..array_length(fns, 1) loop
+    fn_name := fns[i][1];
+    fn_args := fns[i][2];
+    fn_signature := fn_name || '(' || fn_args || ')';
 
--- Se a função abaixo existir no seu banco (sistema de ranking/estrelas),
--- destrava. Se não existir ainda, essa linha só vai dar erro "function
--- does not exist" e pode ser removida/ignorada com segurança.
-do $$
-begin
-  if exists (
-    select 1 from pg_proc where proname = 'award_affiliate_star'
-  ) then
-    execute 'revoke execute on function public.award_affiliate_star(uuid) from public, anon';
-    execute 'grant execute on function public.award_affiliate_star(uuid) to authenticated, service_role';
-  end if;
+    if exists (
+      select 1 from pg_proc p
+      join pg_namespace n on n.oid = p.pronamespace
+      where p.proname = fn_name and n.nspname = 'public'
+    ) then
+      execute format('revoke execute on function public.%s from public, anon', fn_signature);
+      execute format('grant execute on function public.%s to authenticated, service_role', fn_signature);
+      raise notice 'Revoked/granted: %', fn_signature;
+    else
+      raise notice 'Skipped (does not exist): %', fn_signature;
+    end if;
+  end loop;
 end $$;
