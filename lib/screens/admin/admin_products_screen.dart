@@ -19,6 +19,7 @@ class AdminProductsScreen extends ConsumerStatefulWidget {
 class _AdminProductsScreenState extends ConsumerState<AdminProductsScreen> {
   String _search = '';
   bool _syncing = false;
+  bool _generatingLinks = false;
   _StatusFilter _statusFilter = _StatusFilter.all;
 
   @override
@@ -51,6 +52,18 @@ class _AdminProductsScreenState extends ConsumerState<AdminProductsScreen> {
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
                     : const Icon(Icons.sync_rounded),
+              ),
+              const SizedBox(width: 8),
+              IconButton.filledTonal(
+                onPressed: _generatingLinks ? null : () => _runGenerateLinks(context),
+                tooltip: 'Gerar links CJ faltantes',
+                icon: _generatingLinks
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.link_rounded),
               ),
               const SizedBox(width: 8),
               IconButton.filled(
@@ -146,6 +159,71 @@ class _AdminProductsScreenState extends ConsumerState<AdminProductsScreen> {
         ),
       ],
     );
+  }
+
+  Future<void> _runGenerateLinks(BuildContext context) async {
+    final all = ref.read(productsProvider).valueOrNull ?? [];
+    final pending = all
+        .where((p) => (p.cjUrl == null || p.cjUrl!.isEmpty) && p.cjProductId != null)
+        .map((p) => p.cjProductId!)
+        .toList();
+
+    if (pending.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Nenhum produto pendente de link CJ')),
+      );
+      return;
+    }
+
+    setState(() => _generatingLinks = true);
+    final progress = ValueNotifier<String>('0 / ${pending.length}');
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => AlertDialog(
+        content: Row(
+          children: [
+            const CircularProgressIndicator(),
+            const SizedBox(width: 16),
+            Expanded(
+              child: ValueListenableBuilder<String>(
+                valueListenable: progress,
+                builder: (_, v, __) => Text('Gerando links CJ... $v'),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    const batchSize = 20;
+    var totalUpdated = 0;
+    var totalErrors = 0;
+    final repo = ref.read(productRepositoryProvider);
+
+    for (var i = 0; i < pending.length; i += batchSize) {
+      final batch = pending.sublist(i, i + batchSize > pending.length ? pending.length : i + batchSize);
+      try {
+        final result = await repo.generateDeepLinks(batch);
+        totalUpdated += (result['updated'] as int?) ?? 0;
+      } catch (_) {
+        totalErrors += batch.length;
+      }
+      progress.value = '${(i + batch.length).clamp(0, pending.length)} / ${pending.length}';
+    }
+
+    if (context.mounted) Navigator.of(context, rootNavigator: true).pop();
+    setState(() => _generatingLinks = false);
+    ref.invalidate(productsProvider);
+
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(
+          '$totalUpdated link(s) gerados.${totalErrors > 0 ? ' $totalErrors falharam.' : ''}',
+        )),
+      );
+    }
   }
 
   Future<void> _runSync(BuildContext context) async {

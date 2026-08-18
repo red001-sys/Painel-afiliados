@@ -60,4 +60,15 @@ class ProductRepository {
     final response = await _client.functions.invoke('sync-products');
     return Map<String, dynamic>.from(response.data as Map);
   }
+
+  /// Gera o link de afiliado (deep link) real da CJ pra até 20 produtos de
+  /// uma vez, via linkCode(pid). Já grava cj_url no banco pros que
+  /// conseguiu gerar; retorna o resumo da chamada.
+  Future<Map<String, dynamic>> generateDeepLinks(List<String> cjProductIds) async {
+    final response = await _client.functions.invoke(
+      'cj-deep-link',
+      body: {'productIds': cjProductIds},
+    );
+    return Map<String, dynamic>.from(response.data as Map);
+  }
 }
