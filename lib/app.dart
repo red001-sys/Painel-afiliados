@@ -76,6 +76,20 @@ class _CJAppState extends ConsumerState<CJApp> {
         debugPrint('[APP] Initial deep link: $initialUri');
         _handleDeepLink(initialUri);
       }
+
+      // Fallback: check Uri.base directly for password recovery.
+      // Supabase SDK may fire passwordRecovery before the onAuthStateChange
+      // listener is set up. Detect recovery via URL and navigate directly.
+      if (Uri.base.fragment.contains('type=recovery') ||
+          Uri.base.toString().contains('type=recovery')) {
+        debugPrint('[APP] Password recovery detected in Uri.base → navigating to reset password');
+        _navigatorKey.currentState?.pushNamedAndRemoveUntil(
+          AppRouter.resetPassword,
+          (route) => false,
+        );
+        return;
+      }
+
       _linkSubscription = _appLinks.uriLinkStream.listen((uri) {
         debugPrint('[APP] Deep link received: $uri');
         _handleDeepLink(uri);
