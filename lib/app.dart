@@ -76,20 +76,6 @@ class _CJAppState extends ConsumerState<CJApp> {
         debugPrint('[APP] Initial deep link: $initialUri');
         _handleDeepLink(initialUri);
       }
-
-      // Fallback: check Uri.base directly for password recovery.
-      // Supabase SDK may fire passwordRecovery before the onAuthStateChange
-      // listener is set up. Detect recovery via URL and navigate directly.
-      if (Uri.base.fragment.contains('type=recovery') ||
-          Uri.base.toString().contains('type=recovery')) {
-        debugPrint('[APP] Password recovery detected in Uri.base → navigating to reset password');
-        _navigatorKey.currentState?.pushNamedAndRemoveUntil(
-          AppRouter.resetPassword,
-          (route) => false,
-        );
-        return;
-      }
-
       _linkSubscription = _appLinks.uriLinkStream.listen((uri) {
         debugPrint('[APP] Deep link received: $uri');
         _handleDeepLink(uri);
@@ -126,6 +112,12 @@ class _CJAppState extends ConsumerState<CJApp> {
   @override
   Widget build(BuildContext context) {
     final themeMode = ref.watch(themeModeProvider);
+    // Checa a URL direto, sem depender do evento passwordRecovery do
+    // stream de auth — esse evento pode disparar antes do listener em
+    // initState() estar pronto pra ouvir (é um stream broadcast comum,
+    // sem replay), e nesse caso se perde silenciosamente.
+    final isRecoveryLink = Uri.base.toString().contains('type=recovery');
+
     return MaterialApp(
       title: 'Nex Vendedores',
       debugShowCheckedModeBanner: false,
@@ -133,7 +125,7 @@ class _CJAppState extends ConsumerState<CJApp> {
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
       themeMode: themeMode,
-      initialRoute: AppRouter.splash,
+      initialRoute: isRecoveryLink ? AppRouter.resetPassword : AppRouter.splash,
       onGenerateRoute: AppRouter.generateRoute,
     );
   }
