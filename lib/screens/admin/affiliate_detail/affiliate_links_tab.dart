@@ -758,7 +758,7 @@ class _ProductPickerSheetState extends State<_ProductPickerSheet> {
                           ),
                         ),
                         title: Text(p.nome, maxLines: 2, overflow: TextOverflow.ellipsis),
-                        subtitle: p.preco != null ? Text('R\$ ${p.preco!.toStringAsFixed(2)}') : null,
+                        subtitle: p.preco != null ? Text('\$ ${p.preco!.toStringAsFixed(2)}') : null,
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [

@@ -30,7 +30,7 @@ class DashboardScreen extends ConsumerStatefulWidget {
 class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   int _currentIndex = 0;
 
-  static const _titles = ['Dashboard', 'Meus Links', 'Vídeos', 'Histórico', 'Perfil'];
+  static const _titles = ['Dashboard', 'Mais Vendidos', 'Vídeos', 'Histórico', 'Perfil'];
 
   @override
   Widget build(BuildContext context) {
@@ -73,7 +73,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           NavigationDestination(
             icon: Icon(Icons.link_outlined),
             selectedIcon: Icon(Icons.link_rounded),
-            label: 'Links',
+            label: 'Marketplace',
           ),
           NavigationDestination(
             icon: Icon(Icons.video_library_outlined),
@@ -213,7 +213,7 @@ class _DashboardContent extends ConsumerWidget {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          'R\$ ${(summary?.approvedCommission ?? 0).toStringAsFixed(2)}',
+                          '\$ ${(summary?.approvedCommission ?? 0).toStringAsFixed(2)}',
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w700,
@@ -254,7 +254,7 @@ class _DashboardContent extends ConsumerWidget {
                 Expanded(
                   child: MetricCard(
                     title: 'Comissão Total',
-                    value: 'R\$ ${(summary?.totalCommission ?? 0).toStringAsFixed(2)}',
+                    value: '\$ ${(summary?.totalCommission ?? 0).toStringAsFixed(2)}',
                     icon: Icons.attach_money_rounded,
                     color: colorScheme.primary,
                     delay: Duration.zero,
@@ -264,7 +264,7 @@ class _DashboardContent extends ConsumerWidget {
                 Expanded(
                   child: MetricCard(
                     title: 'Pendente',
-                    value: 'R\$ ${(summary?.pendingCommission ?? 0).toStringAsFixed(2)}',
+                    value: '\$ ${(summary?.pendingCommission ?? 0).toStringAsFixed(2)}',
                     icon: Icons.schedule_rounded,
                     color: AppColors.warning,
                     delay: const Duration(milliseconds: 100),
@@ -278,7 +278,7 @@ class _DashboardContent extends ConsumerWidget {
                 Expanded(
                   child: MetricCard(
                     title: 'Aprovada',
-                    value: 'R\$ ${(summary?.approvedCommission ?? 0).toStringAsFixed(2)}',
+                    value: '\$ ${(summary?.approvedCommission ?? 0).toStringAsFixed(2)}',
                     icon: Icons.check_circle_outline_rounded,
                     color: AppColors.success,
                     delay: const Duration(milliseconds: 200),
@@ -288,7 +288,7 @@ class _DashboardContent extends ConsumerWidget {
                 Expanded(
                   child: MetricCard(
                     title: 'Valor Vendido',
-                    value: 'R\$ ${(summary?.totalSales ?? 0).toStringAsFixed(2)}',
+                    value: '\$ ${(summary?.totalSales ?? 0).toStringAsFixed(2)}',
                     icon: Icons.shopping_cart_outlined,
                     color: AppColors.info,
                     delay: const Duration(milliseconds: 300),

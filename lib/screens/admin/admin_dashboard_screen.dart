@@ -82,7 +82,7 @@ class AdminDashboardScreen extends ConsumerWidget {
               icon: Icons.attach_money_rounded,
               label: 'Comissão Total (Aprovada)',
               value:
-                  'R\$ ${(data['totalCommission'] as num?)?.toDouble().toStringAsFixed(2) ?? '0.00'}',
+                  '\$ ${(data['totalCommission'] as num?)?.toDouble().toStringAsFixed(2) ?? '0.00'}',
               color: colorScheme.primary,
               wide: true,
             ),

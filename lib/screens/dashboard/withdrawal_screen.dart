@@ -166,7 +166,7 @@ class _PendingRequestView extends StatelessWidget {
                     size: 48, color: AppColors.warning),
                 const SizedBox(height: 12),
                 Text(
-                  'R\$ ${request.valor.toStringAsFixed(2)} em análise',
+                  '\$ ${request.valor.toStringAsFixed(2)} em análise',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 22,
@@ -256,7 +256,7 @@ class _WithdrawalForm extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'R\$ ${balance.toStringAsFixed(2)}',
+                    '\$ ${balance.toStringAsFixed(2)}',
                     style: const TextStyle(
                       fontSize: 32,
                       fontWeight: FontWeight.w800,
@@ -320,7 +320,7 @@ class _WithdrawalForm extends StatelessWidget {
                   return null;
                 },
                 decoration: const InputDecoration(
-                  labelText: 'Valor (R\$)',
+                  labelText: 'Valor (\$)',
                   hintText: '0.00',
                   prefixIcon: Icon(Icons.attach_money_rounded),
                 ),
@@ -407,7 +407,7 @@ class _ValueChips extends StatelessWidget {
         ),
         if (hasTotalOption) ...[
           const SizedBox(height: 8),
-          buildOption(balance, 'Sacar tudo (R\$ ${balance.toStringAsFixed(2)})'),
+          buildOption(balance, 'Sacar tudo (\$ ${balance.toStringAsFixed(2)})'),
         ],
       ],
     );

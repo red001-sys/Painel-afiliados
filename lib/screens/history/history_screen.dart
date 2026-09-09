@@ -247,7 +247,7 @@ class _SaleTile extends StatelessWidget {
             Row(
               children: [
                 Text(
-                  'Venda: R\$ ${(sale.saleAmount ?? 0).toStringAsFixed(2)}',
+                  'Venda: \$ ${(sale.saleAmount ?? 0).toStringAsFixed(2)}',
                   style: TextStyle(
                     fontSize: 13,
                     color: colorScheme.onSurface.withValues(alpha: 0.7),
@@ -255,7 +255,7 @@ class _SaleTile extends StatelessWidget {
                 ),
                 const Spacer(),
                 Text(
-                  'Comissão: R\$ ${sale.affiliateCommission.toStringAsFixed(2)}',
+                  'Comissão: \$ ${sale.affiliateCommission.toStringAsFixed(2)}',
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,

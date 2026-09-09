@@ -531,7 +531,7 @@ void _showProductDetails(BuildContext context, Product product) {
                 children: [
                   if (product.preco != null)
                     _DetailChip(
-                      label: '${product.currency?.toUpperCase() == 'USD' ? '\$' : 'R\$'} ${product.preco!.toStringAsFixed(2)}',
+                      label: '\$ ${product.preco!.toStringAsFixed(2)}',
                       color: AppColors.ecoGreenDark,
                     ),
                   if (product.categoria != null && product.categoria!.isNotEmpty)
@@ -680,8 +680,8 @@ class _ProductDialogBodyState extends State<_ProductDialogBody> {
             TextField(
               controller: _precoCtrl,
               decoration: const InputDecoration(
-                labelText: 'Preço (R\$)',
-                prefixText: 'R\$ ',
+                labelText: 'Preço (\$)',
+                prefixText: '\$ ',
               ),
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
             ),
