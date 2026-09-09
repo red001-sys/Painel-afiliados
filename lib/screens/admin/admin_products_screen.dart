@@ -490,7 +490,7 @@ class _ProductTile extends StatelessWidget {
   }
 
   String _priceSymbol(Product product) {
-    return product.currency?.toUpperCase() == 'USD' ? r'$' : r'R$';
+    return r'$';
   }
 }
 

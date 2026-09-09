@@ -468,8 +468,15 @@ class _AffiliateLinkCard extends StatelessWidget {
                         ),
                       );
                     },
-                    icon: const Icon(Icons.copy_rounded, size: 16),
+                    icon: const Icon(Icons.copy_rounded, size: 14),
                     label: const Text('Copiar'),
+                    style: OutlinedButton.styleFrom(
+                      minimumSize: const Size(0, 34),
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      visualDensity: VisualDensity.compact,
+                      textStyle: const TextStyle(fontSize: 13),
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -485,8 +492,15 @@ class _AffiliateLinkCard extends StatelessWidget {
                             : null,
                       );
                     },
-                    icon: const Icon(Icons.share_rounded, size: 16),
+                    icon: const Icon(Icons.share_rounded, size: 14),
                     label: const Text('Compartilhar'),
+                    style: OutlinedButton.styleFrom(
+                      minimumSize: const Size(0, 34),
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      visualDensity: VisualDensity.compact,
+                      textStyle: const TextStyle(fontSize: 13),
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -500,8 +514,15 @@ class _AffiliateLinkCard extends StatelessWidget {
                         );
                       }
                     },
-                    icon: const Icon(Icons.open_in_new_rounded, size: 16),
+                    icon: const Icon(Icons.open_in_new_rounded, size: 14),
                     label: const Text('Abrir'),
+                    style: OutlinedButton.styleFrom(
+                      minimumSize: const Size(0, 34),
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      visualDensity: VisualDensity.compact,
+                      textStyle: const TextStyle(fontSize: 13),
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
                   ),
                 ),
               ],
