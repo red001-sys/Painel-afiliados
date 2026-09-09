@@ -1,11 +1,11 @@
 {
-    "name": "Nex Vendedores",
+    "name": "Nex",
     "short_name": "Nex",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#2196F3",
     "theme_color": "#2196F3",
-    "description": "Nex Vendedores",
+    "description": "Nex",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

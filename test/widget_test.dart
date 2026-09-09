@@ -5,11 +5,11 @@ void main() {
   testWidgets('App builds a MaterialApp', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
-        home: Scaffold(body: Center(child: Text('Nex Vendedores'))),
+        home: Scaffold(body: Center(child: Text('Nex'))),
       ),
     );
 
     expect(find.byType(MaterialApp), findsOneWidget);
-    expect(find.text('Nex Vendedores'), findsOneWidget);
+    expect(find.text('Nex'), findsOneWidget);
   });
 }

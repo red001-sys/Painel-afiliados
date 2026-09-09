@@ -119,7 +119,7 @@ class _CJAppState extends ConsumerState<CJApp> {
     final isRecoveryLink = Uri.base.toString().contains('type=recovery');
 
     return MaterialApp(
-      title: 'Nex Vendedores',
+      title: 'Nex',
       debugShowCheckedModeBanner: false,
       navigatorKey: _navigatorKey,
       theme: AppTheme.light,
